@@ -8,3 +8,4 @@
 - Aligned `AGENTS.md` output contracts with `docs/spec.md` artifact naming.
 - Added Phase2/3/4 skeleton modules and wired them into `src/main.py`.
 - Added explicit `greenlet==3.0.1` pin and `pytest==8.3.3` to `requirements.txt`.
+- Added `.venv*` to `.gitignore` and a smoke test for dry-run output.
