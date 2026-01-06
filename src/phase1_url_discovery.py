@@ -26,6 +26,7 @@ DEFAULT_NEGATIVE_DOMAINS = {
     "wikipedia.org", "ja.wikipedia.org",
     "maps.google.", "google.com",
     "prtimes.jp",
+    "onecareer.jp", "biz.ne.jp", "sakura.ne.jp",
     "xn--",  # punycode heuristic (not block, just lower score)
     "tiktok.com", "facebook.com", "x.com", "twitter.com", "instagram.com",
     "wantedly.com", "en-gage.net", "doda.jp", "rikunabi.com", "mynavi.jp", "indeed.com",
@@ -109,14 +110,23 @@ def score_candidate(company_norm: str, cand: Dict[str, Any], rank: int) -> Candi
     # Negative domains (soft penalty)
     for bad in DEFAULT_NEGATIVE_DOMAINS:
         if bad in display or bad in link:
-            score -= 40
-            evidence.append(f"negative_domain:{bad}(-40)")
+            score -= 80
+            evidence.append(f"negative_domain:{bad}(-80)")
             break
 
     # If no registrable domain, penalize
     if not regdom:
         score -= 30
         evidence.append("no_reg_domain(-30)")
+
+    # Prefer top-level pages over deep paths
+    try:
+        path_depth = len([p for p in re.split(r"/+", re.sub(r"^https?://[^/]+", "", link)) if p])
+        if path_depth > 2:
+            score -= 5
+            evidence.append("deep_path(-5)")
+    except Exception:
+        pass
 
     return Candidate(
         link=link,
