@@ -17,3 +17,4 @@
 - Added Phase2 extraction template and Phase4 field-mapping rules in `docs/spec.md`.
 - Documented Phase2 page scoring rules and Phase4 input value priorities in `docs/spec.md`.
 - Implemented Phase2 fetching/extraction and strengthened Phase1 domain penalties.
+- Implemented Phase3 draft generation with signature and opt-out line.

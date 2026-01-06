@@ -27,6 +27,7 @@ DEFAULT_NEGATIVE_DOMAINS = {
     "maps.google.", "google.com",
     "prtimes.jp",
     "onecareer.jp", "biz.ne.jp", "sakura.ne.jp",
+    "brandcloud.co.jp", "kenkatsu10.jp",
     "xn--",  # punycode heuristic (not block, just lower score)
     "tiktok.com", "facebook.com", "x.com", "twitter.com", "instagram.com",
     "wantedly.com", "en-gage.net", "doda.jp", "rikunabi.com", "mynavi.jp", "indeed.com",
