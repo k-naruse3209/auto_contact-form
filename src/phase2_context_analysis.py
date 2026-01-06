@@ -171,6 +171,10 @@ def is_good_sentence(sentence: str) -> bool:
     # avoid menu-like strings
     if sentence.count("・") >= 3 or sentence.count("｜") >= 3:
         return False
+    if sentence.count("株式会社") >= 3 or sentence.count("会社概要") >= 2:
+        return False
+    if sentence.count("採用") >= 2 or sentence.count("ニュース") >= 2:
+        return False
     if len(sentence.split()) > 18:
         return False
     return True
