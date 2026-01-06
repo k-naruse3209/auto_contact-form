@@ -10,3 +10,4 @@
 - Added explicit `greenlet==3.0.1` pin and `pytest==8.3.3` to `requirements.txt`.
 - Added `.venv*` to `.gitignore` and a smoke test for dry-run output.
 - Documented per-phase output schemas in `docs/spec.md` and allowed `--dry-run` with `--phase1-only`.
+- Added sample output templates to `docs/spec.md` and made `tldextract` offline-safe.

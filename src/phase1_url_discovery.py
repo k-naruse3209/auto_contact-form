@@ -20,6 +20,7 @@ from rich.console import Console
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 console = Console()
+TLD_EXTRACTOR = tldextract.TLDExtract(suffix_list_urls=None)
 
 DEFAULT_NEGATIVE_DOMAINS = {
     "wikipedia.org", "ja.wikipedia.org",
@@ -58,7 +59,8 @@ def normalize_company(name: str) -> str:
     return name
 
 def registrable_domain(url: str) -> str:
-    ext = tldextract.extract(url)
+    # Avoid network fetches for PSL; rely on bundled snapshot.
+    ext = TLD_EXTRACTOR(url)
     # ext.domain + ext.suffix is registrable-ish, e.g., "example.co.jp"
     if not ext.domain or not ext.suffix:
         return ""

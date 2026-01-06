@@ -34,6 +34,20 @@
 - 01_search_results.json
 - 02_official_url.json
 - 02_official_url_candidates_scored.json
+### Sample
+```json
+{
+  "company_name": "株式会社サンプル",
+  "items": [
+    {
+      "link": "https://example.co.jp/",
+      "title": "株式会社サンプル",
+      "snippet": "事業概要の説明...",
+      "displayLink": "example.co.jp"
+    }
+  ]
+}
+```
 
 ## Phase 2: Context analysis
 - Fetch: Top / 会社概要 / サービス(事業)紹介
@@ -41,6 +55,35 @@
 ### Outputs
 - 03_pages_fetched.json
 - 04_extracted_context.md
+### Sample
+```json
+{
+  "pages": [
+    {
+      "url": "https://example.co.jp/company",
+      "title": "会社概要",
+      "status_code": 200,
+      "fetched_at": "2026-01-06T12:00:00Z",
+      "content_path": "data/out/sample/03_pages_fetched/company.html"
+    }
+  ]
+}
+```
+```markdown
+# 株式会社サンプル
+
+## 事業概要
+- B2B向けのSaaSを提供
+
+## 想定顧客
+- 中堅製造業
+
+## 強み
+- 導入実績500社
+
+## IT/AI活用の余地（仮説）
+- 問い合わせ対応の自動化
+```
 
 ## Phase 3: Outreach drafting
 - Must include:
@@ -52,6 +95,17 @@
   - 不要な個人情報の保存
 ### Outputs
 - 05_outreach_draft.md
+### Sample
+```markdown
+件名: 問い合わせ業務の自動化ご提案
+
+株式会社サンプル ご担当者様
+
+貴社の「導入実績500社」という実績に触発され、
+問い合わせ対応の自動化をご提案したくご連絡しました。
+
+ご興味あれば15分だけオンラインでお話できれば幸いです。
+```
 
 ## Phase 4: Form automation (Human-in-the-loop)
 - Detect contact page(s)
@@ -61,6 +115,28 @@
 - 06_contact_page_candidates.json
 - 07_form_plan.json
 - 08_ready_to_submit.png
+### Sample
+```json
+{
+  "candidates": [
+    {
+      "url": "https://example.co.jp/contact",
+      "confidence": 0.82,
+      "evidence": ["link text contains 問い合わせ"]
+    }
+  ]
+}
+```
+```json
+{
+  "form_url": "https://example.co.jp/contact",
+  "fields": {
+    "name": "DXAI",
+    "email": "contact@dxai.example"
+  },
+  "notes": "送信直前で停止"
+}
+```
 
 ## Rate limiting & Compliance
 - Per-domain throttle + random jitter
