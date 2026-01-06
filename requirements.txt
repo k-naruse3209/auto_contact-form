@@ -1,0 +1,20 @@
+# Core dependencies
+python-dotenv==1.0.0
+requests==2.31.0
+pandas==2.1.4
+
+# Web scraping and automation
+beautifulsoup4==4.12.2
+playwright==1.40.0
+lxml==5.1.0
+
+# Google Custom Search API
+google-api-python-client==2.111.0
+
+# AI/LLM (optional - add when implementing AI features)
+# openai==1.6.1
+# anthropic==0.8.1
+
+# Utilities
+tqdm==4.66.1
+pyyaml==6.0.1
