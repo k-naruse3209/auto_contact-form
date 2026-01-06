@@ -23,6 +23,8 @@ def main() -> None:
 
     if args.dry_run:
         print("[dry-run] Phase1 URL discovery -> data/out/<company_slug>/01-02 files")
+        if args.phase1_only:
+            return
         print("[dry-run] Phase2 context analysis -> 03-04 files")
         print("[dry-run] Phase3 outreach drafting -> 05 file")
         print("[dry-run] Phase4 form automation -> 06-08 files")

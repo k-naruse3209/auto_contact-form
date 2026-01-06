@@ -30,10 +30,17 @@
 ## Phase 1: URL discovery
 - Use Search API (Google CSE / Tavily) to find official domain
 - Produce top candidates with evidence and confidence score
+### Outputs
+- 01_search_results.json
+- 02_official_url.json
+- 02_official_url_candidates_scored.json
 
 ## Phase 2: Context analysis
 - Fetch: Top / 会社概要 / サービス(事業)紹介
 - Extract: 事業概要, 想定顧客, 強み, IT/AI活用の余地（仮説）
+### Outputs
+- 03_pages_fetched.json
+- 04_extracted_context.md
 
 ## Phase 3: Outreach drafting
 - Must include:
@@ -43,11 +50,17 @@
 - Must avoid:
   - 誇大広告
   - 不要な個人情報の保存
+### Outputs
+- 05_outreach_draft.md
 
 ## Phase 4: Form automation (Human-in-the-loop)
 - Detect contact page(s)
 - Use Playwright to open and fill the form fields
 - Stop at "ready to submit" and take screenshot for human approval
+### Outputs
+- 06_contact_page_candidates.json
+- 07_form_plan.json
+- 08_ready_to_submit.png
 
 ## Rate limiting & Compliance
 - Per-domain throttle + random jitter
