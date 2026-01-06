@@ -4,14 +4,10 @@ from pathlib import Path
 repo_root = Path(__file__).resolve().parents[1]
 sys.path.append(str(repo_root))
 
-from src.phase3_outreach_draft import run_phase3
+from src.phase3_outreach_draft import build_prompt, parse_sections
 
 
-def test_phase3_writes_draft_with_signature_and_optout(tmp_path):
-    out_dir = tmp_path / "out"
-    company_dir = out_dir / "SampleCo"
-    company_dir.mkdir(parents=True)
-
+def test_build_prompt_includes_evidence_and_template():
     context = """
 # 株式会社サンプル
 
@@ -21,12 +17,10 @@ def test_phase3_writes_draft_with_signature_and_optout(tmp_path):
 ## 強み
 - 導入実績500社
     """.strip()
-    (company_dir / "04_extracted_context.md").write_text(context, encoding="utf-8")
+    sections = parse_sections(context)
+    prompt = build_prompt("株式会社サンプル", sections)
 
-    run_phase3(str(out_dir), max_companies=10)
-
-    draft = (company_dir / "05_outreach_draft.md").read_text(encoding="utf-8")
-    assert "株式会社サンプル" in draft
-    assert "導入実績500社" in draft
-    assert "株式会社DXAIソリューションズ" in draft
-    assert "AI実装・オフショア連携" in draft
+    assert "テンプレート:" in prompt
+    assert "エビデンス:" in prompt
+    assert "株式会社サンプル" in prompt
+    assert "導入実績500社" in prompt

@@ -18,6 +18,7 @@ google-api-python-client==2.111.0
 # AI/LLM (optional - add when implementing AI features)
 # openai==1.6.1
 # anthropic==0.8.1
+google-genai==0.6.0
 
 # Utilities
 tqdm==4.66.1

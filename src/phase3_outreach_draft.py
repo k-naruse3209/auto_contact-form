@@ -3,7 +3,8 @@
 
 from __future__ import annotations
 
-import re
+import os
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List
@@ -58,44 +59,65 @@ def pick_evidence_pair(sections: Dict[str, List[str]]) -> tuple[EvidenceAnchor, 
     return mission, strength
 
 
-def build_draft(company_name: str, sections: Dict[str, List[str]]) -> str:
+def clean_evidence(text: str) -> str:
+    if not text or "（未抽出）" in text:
+        return ""
+    bad = ["コーポレートサイト", "会社概要", "採用情報", "お問い合わせ"]
+    if any(b in text for b in bad):
+        return ""
+    return text
+
+
+def load_template() -> str:
+    prompt_path = Path(__file__).resolve().parents[1] / "prompts" / "outreach.md"
+    return read_text(prompt_path)
+
+
+def build_prompt(company_name: str, sections: Dict[str, List[str]]) -> str:
+    template = load_template()
     mission, strength = pick_evidence_pair(sections)
-    mission_text = mission.text or "貴社の取り組み"
-    strength_text = strength.text or "現場に根ざした支援"
+    mission_text = clean_evidence(mission.text)
+    strength_text = clean_evidence(strength.text)
 
-    template = f"""件名： 【ご提案】{company_name}における「AI実装・オフショア連携」について
+    evidence_block = "\n".join(
+        [
+            f"- company_name: {company_name}",
+            f"- mission_evidence: {mission_text or '（該当なし）'}",
+            f"- strength_evidence: {strength_text or '（該当なし）'}",
+        ]
+    )
 
-本文：
+    instructions = (
+        "あなたは日本語で協業依頼文を作成する担当者です。"
+        "以下のテンプレートに沿って、本文のみを出力してください。"
+        "テンプレート内の {company_name}, {mission_evidence}, {strength_evidence} を適切に置換し、"
+        "不自然な箇所は整えてください。"
+        "（該当なし）の場合は抽象表現に言い換えて、長文のコピペは避け、120文字以内の根拠に要約してください。"
+        "余計な見出しやコードブロックは出力しないでください。"
+    )
 
-{company_name} ご担当者様
+    return "\n\n".join(
+        [
+            instructions,
+            "テンプレート:",
+            template,
+            "エビデンス:",
+            evidence_block,
+        ]
+    )
 
-突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。
 
-貴社のWebサイトを拝見し、「{mission_text}」という点に深く感銘を受けております。 特に、貴社が強みとされる「{strength_text}」といった領域や、DX推進現場において、「システム実装」や「AI開発」を担う技術パートナーとしてお力添えできればと思いご連絡いたしました。
-
-弊社は、東京とベトナム（ハノイ・ダナン）に拠点を置く開発会社です。 グループ全体で約30名規模の少数精鋭体制ながら、「日本品質×オフショアの機動力」を強みとしており、貴社の事業に以下のシナジーを生み出せると考えております。
-
-貴社PMO・コンサルティング案件の「実装パートナー」 貴社が支援されるDXプロジェクトやPMO支援の現場において、戦略を実行に移すための「開発実働部隊」として機能します。弊社のベトナム拠点を活用いただくことで、国内相場よりも適正なコストで高品質なリソースを提供し、プロジェクトの利益率向上に貢献します。
-
-「AIソリューション」における技術連携 貴社が注力される領域において、弊社の生成AI（LLM・マルチモーダルAI）技術がお役に立てる可能性があります。OCRや画像解析とLLMを組み合わせた高度なデータ処理エンジンの共同開発や、RAG（検索拡張生成）を用いたナレッジ活用システムの構築など、技術面での壁打ち相手としてもご活用いただけます。
-
-プラットフォーム事業への「オフショアチーム」提供 貴社のIT人材プラットフォームにおけるリソースの選択肢の一つとして、弊社の「ラボ型開発チーム（ベトナム）」を組み込んでいただくご提案です。個人のフリーランス人材だけでなく、まとまった開発チームを柔軟に提供できるパートナーとして連携させていただくことで、クライアントへの提案の幅を広げます。
-
-【弊社の実績一例】 ・金融・建設業界向けクラウドシステム構築 ・多言語対応AIソリューション（自社開発：Lingua Flow） ・ユニクロ様、楽天様、Sansan様など大手企業様向け開発実績多数
-
-貴社の理念に、弊社の「実装力」と「オフショアのメリット」を加えていただき、共にクライアント様の現場変革を加速させられれば幸いです。
-
-まずは会社概要や開発事例をお送りするだけでも構いませんし、オンラインでの情報交換（15〜30分程度）の機会をいただけますと幸いです。
-
-ご検討のほど、何卒よろしくお願い申し上げます。
-
-Mail: k-naruse@dxai-sol.co.jp
-Tel: 050-1722-6417
-株式会社DXAIソリューションズ (DXAI Solutions Co., Ltd.)
-URL: https://dxai-sol.co.jp/
-【東京本社】 〒104-0033 東京都中央区新川1-3-21 BIZSMART 4階 【開発拠点】 ベトナム（ハノイ・ダナン）、大分県（姫島サテライト）
-"""
-    return template.rstrip() + "\n"
+def generate_draft_llm(prompt: str) -> str:
+    api_key = os.getenv("GEMINI_API_KEY", "").strip()
+    if not api_key:
+        raise SystemExit("Missing GEMINI_API_KEY in .env")
+    model = os.getenv("GEMINI_MODEL", "gemini-3.0-flash").strip()
+    from google import genai
+    client = genai.Client(api_key=api_key)
+    response = client.models.generate_content(model=model, contents=prompt)
+    if not response or not getattr(response, "text", None):
+        raise RuntimeError("Gemini returned empty response")
+    return response.text.strip() + "\n"
 
 
 def run_phase3(out_dir: str, max_companies: int = 50) -> None:
@@ -117,8 +139,10 @@ def run_phase3(out_dir: str, max_companies: int = 50) -> None:
         md = read_text(context_path)
         sections = parse_sections(md)
         company_name = extract_company_name(md, company_dir.name)
-        draft = build_draft(company_name, sections)
+        prompt = build_prompt(company_name, sections)
+        draft = generate_draft_llm(prompt)
         (company_dir / "05_outreach_draft.md").write_text(draft, encoding="utf-8")
+        time.sleep(0.5)
 
     print("[phase3] DONE")
 
