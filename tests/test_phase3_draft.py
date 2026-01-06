@@ -29,4 +29,4 @@ def test_phase3_writes_draft_with_signature_and_optout(tmp_path):
     assert "株式会社サンプル" in draft
     assert "導入実績500社" in draft
     assert "株式会社DXAIソリューションズ" in draft
-    assert "不要でしたら本メールは破棄してください。" in draft
+    assert "AI実装・オフショア連携" in draft

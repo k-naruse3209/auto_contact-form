@@ -6,7 +6,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 
 @dataclass
@@ -39,53 +39,63 @@ def extract_company_name(md: str, fallback: str) -> str:
     return fallback
 
 
-def pick_evidence(sections: Dict[str, List[str]]) -> EvidenceAnchor:
-    for key in ("強み", "事業概要", "想定顧客"):
+def pick_evidence_pair(sections: Dict[str, List[str]]) -> tuple[EvidenceAnchor, EvidenceAnchor]:
+    mission = EvidenceAnchor(source_section="", text="")
+    strength = EvidenceAnchor(source_section="", text="")
+
+    for key in ("事業概要", "想定顧客", "強み"):
         items = sections.get(key, [])
         if items:
-            return EvidenceAnchor(source_section=key, text=items[0])
-    return EvidenceAnchor(source_section="", text="")
+            mission = EvidenceAnchor(source_section=key, text=items[0])
+            break
 
+    for key in ("強み", "事業概要"):
+        items = sections.get(key, [])
+        if items:
+            strength = EvidenceAnchor(source_section=key, text=items[0])
+            break
 
-def load_signature() -> str:
-    prompt_path = Path(__file__).resolve().parents[1] / "prompts" / "outreach.md"
-    text = read_text(prompt_path)
-    if "署名情報:" not in text:
-        return ""
-    signature = text.split("署名情報:", 1)[1].strip()
-    # Normalize bullet markers if present
-    lines = [line.strip("- ") for line in signature.splitlines() if line.strip()]
-    return "\n".join(lines)
+    return mission, strength
 
 
 def build_draft(company_name: str, sections: Dict[str, List[str]]) -> str:
-    evidence = pick_evidence(sections)
-    if evidence.text:
-        why_you = f"貴社の「{evidence.text}」に触れ、"
-    else:
-        why_you = "貴社の事業内容を拝見し、"
+    mission, strength = pick_evidence_pair(sections)
+    mission_text = mission.text or "貴社の取り組み"
+    strength_text = strength.text or "現場に根ざした支援"
 
-    value = "当社では要件整理から開発・運用まで伴走し、問い合わせ対応の自動化や業務改善をご支援しています。"
-    cta = "ご興味があれば15分だけオンラインでお話できれば幸いです。"
-    opt_out = "不要でしたら本メールは破棄してください。"
+    template = f"""件名： 【ご提案】{company_name}における「AI実装・オフショア連携」について
 
-    signature = load_signature()
-    lines = [
-        "件名: 問い合わせ業務の自動化ご提案",
-        "",
-        f"{company_name} ご担当者様",
-        "",
-        f"{why_you}問い合わせ対応の自動化についてご提案したくご連絡しました。",
-        value,
-        "",
-        cta,
-        "",
-    ]
-    if signature:
-        lines.append(signature)
-        lines.append("")
-    lines.append(opt_out)
-    return "\n".join(lines).rstrip() + "\n"
+本文：
+
+{company_name} ご担当者様
+
+突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。
+
+貴社のWebサイトを拝見し、「{mission_text}」という点に深く感銘を受けております。 特に、貴社が強みとされる「{strength_text}」といった領域や、DX推進現場において、「システム実装」や「AI開発」を担う技術パートナーとしてお力添えできればと思いご連絡いたしました。
+
+弊社は、東京とベトナム（ハノイ・ダナン）に拠点を置く開発会社です。 グループ全体で約30名規模の少数精鋭体制ながら、「日本品質×オフショアの機動力」を強みとしており、貴社の事業に以下のシナジーを生み出せると考えております。
+
+貴社PMO・コンサルティング案件の「実装パートナー」 貴社が支援されるDXプロジェクトやPMO支援の現場において、戦略を実行に移すための「開発実働部隊」として機能します。弊社のベトナム拠点を活用いただくことで、国内相場よりも適正なコストで高品質なリソースを提供し、プロジェクトの利益率向上に貢献します。
+
+「AIソリューション」における技術連携 貴社が注力される領域において、弊社の生成AI（LLM・マルチモーダルAI）技術がお役に立てる可能性があります。OCRや画像解析とLLMを組み合わせた高度なデータ処理エンジンの共同開発や、RAG（検索拡張生成）を用いたナレッジ活用システムの構築など、技術面での壁打ち相手としてもご活用いただけます。
+
+プラットフォーム事業への「オフショアチーム」提供 貴社のIT人材プラットフォームにおけるリソースの選択肢の一つとして、弊社の「ラボ型開発チーム（ベトナム）」を組み込んでいただくご提案です。個人のフリーランス人材だけでなく、まとまった開発チームを柔軟に提供できるパートナーとして連携させていただくことで、クライアントへの提案の幅を広げます。
+
+【弊社の実績一例】 ・金融・建設業界向けクラウドシステム構築 ・多言語対応AIソリューション（自社開発：Lingua Flow） ・ユニクロ様、楽天様、Sansan様など大手企業様向け開発実績多数
+
+貴社の理念に、弊社の「実装力」と「オフショアのメリット」を加えていただき、共にクライアント様の現場変革を加速させられれば幸いです。
+
+まずは会社概要や開発事例をお送りするだけでも構いませんし、オンラインでの情報交換（15〜30分程度）の機会をいただけますと幸いです。
+
+ご検討のほど、何卒よろしくお願い申し上げます。
+
+Mail: k-naruse@dxai-sol.co.jp
+Tel: 050-1722-6417
+株式会社DXAIソリューションズ (DXAI Solutions Co., Ltd.)
+URL: https://dxai-sol.co.jp/
+【東京本社】 〒104-0033 東京都中央区新川1-3-21 BIZSMART 4階 【開発拠点】 ベトナム（ハノイ・ダナン）、大分県（姫島サテライト）
+"""
+    return template.rstrip() + "\n"
 
 
 def run_phase3(out_dir: str, max_companies: int = 50) -> None:
