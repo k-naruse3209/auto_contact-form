@@ -52,6 +52,22 @@
 ## Phase 2: Context analysis
 - Fetch: Top / 会社概要 / サービス(事業)紹介
 - Extract: 事業概要, 想定顧客, 強み, IT/AI活用の余地（仮説）
+### Extraction template
+```markdown
+# {company_name}
+
+## 事業概要
+- ...
+
+## 想定顧客
+- ...
+
+## 強み
+- ...
+
+## IT/AI活用の余地（仮説）
+- ...
+```
 ### Outputs
 - 03_pages_fetched.json
 - 04_extracted_context.md
@@ -138,6 +154,11 @@ k-naruse@dxai-sol.co.jp
 - Inputs: 06_contact_page_candidates.json, 05_outreach_draft.md
 - Steps: open contact page, map fields, fill, stop before submit, take screenshot
 - Outputs: 07_form_plan.json, 08_ready_to_submit.png
+
+## Form field mapping (Phase4)
+- Required fields: company, name, email, message
+- Optional fields: phone, department, role, website
+- Preference: use form labels/placeholders to map fields; avoid guessing
 ### Sample
 ```json
 {
