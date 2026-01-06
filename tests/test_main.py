@@ -61,3 +61,15 @@ def test_dry_run_phase4_only_outputs():
     assert "Phase1 URL discovery" not in out
     assert "Phase2 context analysis" not in out
     assert "Phase3 outreach drafting" not in out
+
+
+def test_phase_only_run_logs():
+    repo_root = Path(__file__).resolve().parents[1]
+    for flag, expected in (
+        ("--phase2-only", "[phase2-only] start"),
+        ("--phase3-only", "[phase3-only] start"),
+        ("--phase4-only", "[phase4-only] start"),
+    ):
+        cmd = [sys.executable, "-m", "src.main", flag, "--max-companies", "0"]
+        result = subprocess.run(cmd, cwd=repo_root, capture_output=True, text=True, check=True)
+        assert expected in result.stdout

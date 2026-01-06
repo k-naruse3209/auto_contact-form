@@ -52,15 +52,19 @@ def main() -> None:
         return
 
     if args.phase2_only:
+        print("[phase2-only] start")
         run_phase2(out_dir=args.out, max_companies=args.max_companies)
         return
     if args.phase3_only:
+        print("[phase3-only] start")
         run_phase3(out_dir=args.out, max_companies=args.max_companies)
         return
     if args.phase4_only:
+        print("[phase4-only] start")
         run_phase4(out_dir=args.out, max_companies=args.max_companies)
         return
 
+    print("[phase1] start")
     run_phase1(
         csv_path=args.csv,
         out_dir=args.out,
@@ -71,8 +75,11 @@ def main() -> None:
     )
 
     if not args.phase1_only:
+        print("[phase2] start")
         run_phase2(out_dir=args.out, max_companies=args.max_companies)
+        print("[phase3] start")
         run_phase3(out_dir=args.out, max_companies=args.max_companies)
+        print("[phase4] start")
         run_phase4(out_dir=args.out, max_companies=args.max_companies)
 
 

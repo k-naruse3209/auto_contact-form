@@ -12,3 +12,4 @@
 - Documented per-phase output schemas in `docs/spec.md` and allowed `--dry-run` with `--phase1-only`.
 - Added sample output templates to `docs/spec.md` and made `tldextract` offline-safe.
 - Aligned the Phase3 sample draft in `docs/spec.md` with `prompts/outreach.md` signature requirements.
+- Added phase-only run logging and an opt-out line requirement in `prompts/outreach.md`.
