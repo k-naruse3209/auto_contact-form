@@ -6,3 +6,4 @@
 - Added `src/main.py` as the project entrypoint and aligned README usage with `python -m src.main --dry-run`.
 - Added `.env.example` for reproducible setup.
 - Aligned `AGENTS.md` output contracts with `docs/spec.md` artifact naming.
+- Added Phase2/3/4 skeleton modules and wired them into `src/main.py`.

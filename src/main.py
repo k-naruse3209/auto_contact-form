@@ -4,6 +4,9 @@
 import argparse
 
 from src.phase1_url_discovery import run_phase1
+from src.phase2_context_analysis import run_phase2
+from src.phase3_outreach_draft import run_phase3
+from src.phase4_form_automation import run_phase4
 
 
 def main() -> None:
@@ -20,9 +23,9 @@ def main() -> None:
 
     if args.dry_run:
         print("[dry-run] Phase1 URL discovery -> data/out/<company_slug>/01-02 files")
-        print("[dry-run] Phase2 context analysis (not implemented)")
-        print("[dry-run] Phase3 outreach drafting (not implemented)")
-        print("[dry-run] Phase4 form automation (not implemented)")
+        print("[dry-run] Phase2 context analysis -> 03-04 files")
+        print("[dry-run] Phase3 outreach drafting -> 05 file")
+        print("[dry-run] Phase4 form automation -> 06-08 files")
         return
 
     run_phase1(
@@ -35,7 +38,9 @@ def main() -> None:
     )
 
     if not args.phase1_only:
-        print("Phase2-4 are not implemented yet. Stopping after Phase1.")
+        run_phase2(out_dir=args.out, max_companies=args.max_companies)
+        run_phase3(out_dir=args.out, max_companies=args.max_companies)
+        run_phase4(out_dir=args.out, max_companies=args.max_companies)
 
 
 if __name__ == "__main__":
