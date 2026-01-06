@@ -52,6 +52,11 @@
 ## Phase 2: Context analysis
 - Fetch: Top / 会社概要 / サービス(事業)紹介
 - Extract: 事業概要, 想定顧客, 強み, IT/AI活用の余地（仮説）
+### Page scoring (candidate selection)
+- Prefer official domain pages over subdomains; penalize external domains
+- Score boost if title/URL contains: 会社概要, 企業情報, 事業, サービス, プロダクト
+- Score penalty if title/URL contains: 採用, 求人, IR, プレス, ニュース
+- Minimum: at least Top + 会社概要 or サービス
 ### Extraction template
 ```markdown
 # {company_name}
@@ -159,6 +164,13 @@ k-naruse@dxai-sol.co.jp
 - Required fields: company, name, email, message
 - Optional fields: phone, department, role, website
 - Preference: use form labels/placeholders to map fields; avoid guessing
+### Input value priority
+- company: from 02_official_url.json.company_name; fallback to CSV company_name
+- name: fixed sender name from prompts/outreach.md signature
+- email: fixed sender email from prompts/outreach.md signature
+- message: content of 05_outreach_draft.md
+- phone: if required, use signature Tel; otherwise leave blank
+- department/role/website: leave blank unless explicitly provided in input
 ### Sample
 ```json
 {

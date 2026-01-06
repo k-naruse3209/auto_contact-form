@@ -15,3 +15,4 @@
 - Added phase-only run logging and an opt-out line requirement in `prompts/outreach.md`.
 - Added opt-out line to the Phase3 sample and documented Phase2-4 implementation plan in `docs/spec.md`.
 - Added Phase2 extraction template and Phase4 field-mapping rules in `docs/spec.md`.
+- Documented Phase2 page scoring rules and Phase4 input value priorities in `docs/spec.md`.
