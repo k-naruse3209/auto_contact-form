@@ -15,9 +15,12 @@
 
 ## Output contracts
 - Persist per-company artifacts:
-  - normalized_company.json
-  - discovered_urls.json
-  - extracted_context.md
-  - outreach_draft.md
-  - form_plan.json
-  - run_log.json
+  - 01_search_results.json
+  - 02_official_url.json
+  - 03_pages_fetched.json
+  - 04_extracted_context.md
+  - 05_outreach_draft.md
+  - 06_contact_page_candidates.json
+  - 07_form_plan.json
+  - 08_ready_to_submit.png
+  - 99_run_log.json

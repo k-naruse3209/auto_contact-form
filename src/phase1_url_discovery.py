@@ -170,14 +170,97 @@ def ensure_out_dir(base: Path, company_name: str) -> Path:
 def write_json(path: Path, obj: Any) -> None:
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
 
-def main():
+def run_phase1(
+    csv_path: str,
+    out_dir: str,
+    max_companies: int = 50,
+    sleep_min: float = 0.2,
+    sleep_max: float = 0.6,
+    num: int = 5,
+    api_key: Optional[str] = None,
+    cx: Optional[str] = None,
+) -> None:
     load_dotenv()
-    api_key = os.getenv("GOOGLE_CSE_API_KEY", "").strip()
-    cx = os.getenv("GOOGLE_CSE_CX", "").strip()
+    api_key = (api_key or os.getenv("GOOGLE_CSE_API_KEY", "")).strip()
+    cx = (cx or os.getenv("GOOGLE_CSE_CX", "")).strip()
     if not api_key or not cx:
         console.print("[red]Missing GOOGLE_CSE_API_KEY or GOOGLE_CSE_CX in .env[/red]")
         raise SystemExit(1)
 
+    in_path = Path(csv_path)
+    out_base = Path(out_dir)
+    out_base.mkdir(parents=True, exist_ok=True)
+
+    df = pd.read_csv(in_path)
+    if "company_name" not in df.columns:
+        raise SystemExit("CSV must contain column: company_name")
+
+    companies = df["company_name"].dropna().astype(str).tolist()[: max_companies]
+    console.print(f"[cyan]Phase1 URL discovery start: companies={len(companies)}[/cyan]")
+
+    summary = {"total": len(companies), "success": 0, "fail": 0, "items": []}
+
+    with httpx.Client(headers={"User-Agent": "DXAI-OutreachBot/0.1 (contact: k-naruse@dxai-sol.co.jp)"}) as client:
+        for idx, name in enumerate(companies, start=1):
+            out_dir = ensure_out_dir(out_base, name)
+            run_log = {"company_name": name, "started_at": time.time(), "queries": [], "status": "unknown"}
+
+            try:
+                all_items: List[Dict[str, Any]] = []
+                queries = build_queries(name)
+                for q in queries:
+                    data = google_cse_search(client, api_key, cx, q, num=num)
+                    items = data.get("items", []) or []
+                    run_log["queries"].append({"q": q, "returned": len(items)})
+                    all_items.extend(items)
+
+                    # jittered sleep to be polite + reduce burst
+                    time.sleep(random.uniform(sleep_min, sleep_max))
+
+                # Save raw results (dedupe lightly by link)
+                seen = set()
+                deduped = []
+                for it in all_items:
+                    link = it.get("link", "")
+                    if link and link not in seen:
+                        seen.add(link)
+                        deduped.append(it)
+
+                write_json(out_dir / "01_search_results.json", {"company_name": name, "items": deduped})
+
+                best, scored = pick_best(name, deduped)
+                write_json(out_dir / "02_official_url.json", {
+                    "company_name": name,
+                    "official_url": best.link if best else None,
+                    "registrable_domain": best.registrable_domain if best else None,
+                    "confidence_score": best.score if best else None,
+                    "evidence": best.evidence if best else None,
+                })
+                write_json(out_dir / "02_official_url_candidates_scored.json", [c.__dict__ for c in scored[:20]])
+
+                run_log["status"] = "success" if best else "no_candidate"
+                summary["success"] += 1 if best else 0
+                summary["fail"] += 0 if best else 1
+                summary["items"].append({"company_name": name, "official_url": best.link if best else None})
+
+                console.print(f"[green]{idx}/{len(companies)} OK[/green] {name} -> {best.link if best else 'None'}")
+
+            except Exception as e:
+                run_log["status"] = "fail"
+                run_log["error"] = repr(e)
+                summary["fail"] += 1
+                summary["items"].append({"company_name": name, "official_url": None, "error": repr(e)})
+                console.print(f"[red]{idx}/{len(companies)} FAIL[/red] {name} :: {e}")
+
+            finally:
+                run_log["ended_at"] = time.time()
+                write_json(out_dir / "99_run_log.json", run_log)
+
+    write_json(out_base / "phase1_summary.json", summary)
+    console.print("[cyan]DONE[/cyan] -> data/out/phase1_summary.json")
+
+
+def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--csv", default="data/company_names.csv")
     ap.add_argument("--out", default="data/out")
@@ -187,78 +270,14 @@ def main():
     ap.add_argument("--num", type=int, default=5, help="Results per query")
     args = ap.parse_args()
 
-    in_path = Path(args.csv)
-    out_base = Path(args.out)
-    out_base.mkdir(parents=True, exist_ok=True)
-
-    df = pd.read_csv(in_path)
-    if "company_name" not in df.columns:
-        raise SystemExit("CSV must contain column: company_name")
-
-    companies = df["company_name"].dropna().astype(str).tolist()[: args.max_companies]
-    console.print(f"[cyan]Phase1 URL discovery start: companies={len(companies)}[/cyan]")
-
-    client = httpx.Client(headers={"User-Agent": "DXAI-OutreachBot/0.1 (contact: k-naruse@dxai-sol.co.jp)"})
-
-    summary = {"total": len(companies), "success": 0, "fail": 0, "items": []}
-
-    for idx, name in enumerate(companies, start=1):
-        out_dir = ensure_out_dir(out_base, name)
-        run_log = {"company_name": name, "started_at": time.time(), "queries": [], "status": "unknown"}
-
-        try:
-            all_items: List[Dict[str, Any]] = []
-            queries = build_queries(name)
-            for q in queries:
-                data = google_cse_search(client, api_key, cx, q, num=args.num)
-                items = data.get("items", []) or []
-                run_log["queries"].append({"q": q, "returned": len(items)})
-                all_items.extend(items)
-
-                # jittered sleep to be polite + reduce burst
-                time.sleep(random.uniform(args.sleep_min, args.sleep_max))
-
-            # Save raw results (dedupe lightly by link)
-            seen = set()
-            deduped = []
-            for it in all_items:
-                link = it.get("link", "")
-                if link and link not in seen:
-                    seen.add(link)
-                    deduped.append(it)
-
-            write_json(out_dir / "01_search_results.json", {"company_name": name, "items": deduped})
-
-            best, scored = pick_best(name, deduped)
-            write_json(out_dir / "02_official_url.json", {
-                "company_name": name,
-                "official_url": best.link if best else None,
-                "registrable_domain": best.registrable_domain if best else None,
-                "confidence_score": best.score if best else None,
-                "evidence": best.evidence if best else None,
-            })
-            write_json(out_dir / "02_official_url_candidates_scored.json", [c.__dict__ for c in scored[:20]])
-
-            run_log["status"] = "success" if best else "no_candidate"
-            summary["success"] += 1 if best else 0
-            summary["fail"] += 0 if best else 1
-            summary["items"].append({"company_name": name, "official_url": best.link if best else None})
-
-            console.print(f"[green]{idx}/{len(companies)} OK[/green] {name} -> {best.link if best else 'None'}")
-
-        except Exception as e:
-            run_log["status"] = "fail"
-            run_log["error"] = repr(e)
-            summary["fail"] += 1
-            summary["items"].append({"company_name": name, "official_url": None, "error": repr(e)})
-            console.print(f"[red]{idx}/{len(companies)} FAIL[/red] {name} :: {e}")
-
-        finally:
-            run_log["ended_at"] = time.time()
-            write_json(out_dir / "99_run_log.json", run_log)
-
-    write_json(out_base / "phase1_summary.json", summary)
-    console.print("[cyan]DONE[/cyan] -> data/out/phase1_summary.json")
+    run_phase1(
+        csv_path=args.csv,
+        out_dir=args.out,
+        max_companies=args.max_companies,
+        sleep_min=args.sleep_min,
+        sleep_max=args.sleep_max,
+        num=args.num,
+    )
 
 if __name__ == "__main__":
     main()

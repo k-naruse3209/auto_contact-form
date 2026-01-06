@@ -17,6 +17,8 @@ source venv/bin/activate
 venv\Scripts\activate
 
 # 依存パッケージのインストール
+uv sync
+# または
 pip install -r requirements.txt
 
 # Playwright ブラウザのインストール
@@ -48,18 +50,25 @@ auto_contact-form/
 ├── docs/                    # ドキュメント
 │   ├── spec.md
 │   ├── acceptance.md
-│   └── security.md
+│   ├── security.md
+│   └── decisions.md
 ├── prompts/                 # プロンプトテンプレート
 │   └── outreach.md
-├── src/                     # ソースコード (TBD)
+├── src/                     # ソースコード
+│   └── main.py
 ├── .env                     # 環境変数（gitignore）
 ├── .env.example            # 環境変数テンプレート
+├── AGENTS.md               # Codex用作業ルール
+├── CLAUDE.md               # Claude Code用メモリ
 └── requirements.txt        # 依存パッケージ
 ```
 
 ## 使い方
 
-（実装後に追記予定）
+```bash
+# Dry run（送信は行わない）
+python -m src.main --dry-run
+```
 
 ## ドキュメント
 

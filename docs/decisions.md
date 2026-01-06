@@ -3,3 +3,6 @@
 ## 2026-01-06
 - Added `AGENTS.md` and `CLAUDE.md` to capture Codex/Claude project instructions.
 - Relaxed pandas pin from `==2.1.4` to `>=2.2.0` in `requirements.txt`.
+- Added `src/main.py` as the project entrypoint and aligned README usage with `python -m src.main --dry-run`.
+- Added `.env.example` for reproducible setup.
+- Aligned `AGENTS.md` output contracts with `docs/spec.md` artifact naming.
