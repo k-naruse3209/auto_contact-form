@@ -1,12 +1,15 @@
 # Core dependencies
 python-dotenv==1.0.0
 requests==2.31.0
+httpx==0.25.2
 pandas==2.1.4
+tenacity==8.2.3
 
 # Web scraping and automation
 beautifulsoup4==4.12.2
 playwright==1.40.0
 lxml==5.1.0
+tldextract==5.1.1
 
 # Google Custom Search API
 google-api-python-client==2.111.0
@@ -18,3 +21,4 @@ google-api-python-client==2.111.0
 # Utilities
 tqdm==4.66.1
 pyyaml==6.0.1
+rich==13.7.0
