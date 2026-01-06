@@ -13,3 +13,4 @@
 - Added sample output templates to `docs/spec.md` and made `tldextract` offline-safe.
 - Aligned the Phase3 sample draft in `docs/spec.md` with `prompts/outreach.md` signature requirements.
 - Added phase-only run logging and an opt-out line requirement in `prompts/outreach.md`.
+- Added opt-out line to the Phase3 sample and documented Phase2-4 implementation plan in `docs/spec.md`.

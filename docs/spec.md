@@ -110,6 +110,8 @@
 担当：成瀬
 https://dxai-sol.co.jp/
 k-naruse@dxai-sol.co.jp
+
+不要でしたら本メールは破棄してください。
 ```
 
 ## Phase 4: Form automation (Human-in-the-loop)
@@ -120,6 +122,22 @@ k-naruse@dxai-sol.co.jp
 - 06_contact_page_candidates.json
 - 07_form_plan.json
 - 08_ready_to_submit.png
+
+## Implementation plan (Phase2-4)
+### Phase 2
+- Inputs: 02_official_url.json, site pages
+- Steps: fetch Top/会社概要/サービス, sanitize HTML, extract key facts
+- Outputs: 03_pages_fetched.json, 04_extracted_context.md
+
+### Phase 3
+- Inputs: 04_extracted_context.md, prompts/outreach.md
+- Steps: draft outreach with evidence anchors and opt-out line
+- Outputs: 05_outreach_draft.md
+
+### Phase 4
+- Inputs: 06_contact_page_candidates.json, 05_outreach_draft.md
+- Steps: open contact page, map fields, fill, stop before submit, take screenshot
+- Outputs: 07_form_plan.json, 08_ready_to_submit.png
 ### Sample
 ```json
 {
