@@ -8,6 +8,7 @@ tenacity==8.2.3
 # Web scraping and automation
 beautifulsoup4==4.12.2
 playwright==1.40.0
+greenlet==3.0.1
 lxml==5.1.0
 tldextract==5.1.1
 
@@ -22,3 +23,6 @@ google-api-python-client==2.111.0
 tqdm==4.66.1
 pyyaml==6.0.1
 rich==13.7.0
+
+# Tests
+pytest==8.3.3
