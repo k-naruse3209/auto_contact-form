@@ -61,7 +61,29 @@ def extract_text(html: str) -> str:
     soup = BeautifulSoup(html, "lxml")
     for tag in soup(["script", "style", "noscript"]):
         tag.decompose()
-    return soup.get_text(" ", strip=True)
+    for tag in soup(["nav", "header", "footer", "aside", "form"]):
+        tag.decompose()
+    for tag in list(soup.find_all(True)):
+        if not getattr(tag, "get", None) or not isinstance(getattr(tag, "attrs", None), dict):
+            continue
+        classes = " ".join(tag.get("class", []))
+        ident = tag.get("id", "") or ""
+        needle = f"{classes} {ident}".lower()
+        if re.search(r"(nav|menu|header|footer|breadcrumb|sidebar|gnav|global-nav|site-header|site-footer)", needle):
+            tag.decompose()
+    meta_texts = []
+    for key in ("description", "og:description"):
+        tag = soup.find("meta", attrs={"name": key}) or soup.find("meta", attrs={"property": key})
+        if tag and tag.get("content"):
+            meta_texts.append(tag["content"].strip())
+    title_text = extract_title(html)
+    headings = []
+    for h in soup.find_all(["h1", "h2"]):
+        text = normalize_text(h.get_text(" ", strip=True))
+        if text:
+            headings.append(text)
+    body_text = soup.get_text(" ", strip=True)
+    return " ".join(meta_texts + [title_text] + headings + [body_text]).strip()
 
 
 def extract_title(html: str) -> str:
@@ -108,7 +130,17 @@ def pick_candidate_urls(home_url: str, html: str, max_extra: int = 2) -> List[st
     scored = collect_internal_links(html, home_url, regdom)
     ranked = sorted(scored.items(), key=lambda x: x[1], reverse=True)
     extras = [url for url, score in ranked if score > 0][:max_extra]
-    return extras
+    base = f"{urlparse(home_url).scheme}://{urlparse(home_url).netloc}/"
+    for path in ("/company", "/about", "/service", "/services", "/business", "/company/profile", "/about-us"):
+        extras.append(urljoin(base, path))
+    # de-dup while preserving order
+    seen = set()
+    deduped = []
+    for url in extras:
+        if url not in seen and registrable_domain(url) == regdom:
+            seen.add(url)
+            deduped.append(url)
+    return deduped[:max_extra]
 
 
 def fetch_page(client: httpx.Client, url: str) -> tuple[int, str]:
@@ -116,18 +148,56 @@ def fetch_page(client: httpx.Client, url: str) -> tuple[int, str]:
     return r.status_code, r.text
 
 
+def is_good_sentence(sentence: str) -> bool:
+    if not sentence:
+        return False
+    if len(sentence) < 12 or len(sentence) > 200:
+        return False
+    bad_markers = [
+        "©",
+        "Copyright",
+        "プライバシーポリシー",
+        "お問い合わせ",
+        "採用情報",
+        "ニュースリリース",
+        "プレスリリース",
+        "メニュー",
+        "ホーム",
+        "トップ",
+        "skip",
+    ]
+    if any(b in sentence for b in bad_markers):
+        return False
+    # avoid menu-like strings
+    if sentence.count("・") >= 3 or sentence.count("｜") >= 3:
+        return False
+    if len(sentence.split()) > 18:
+        return False
+    return True
+
+
+def truncate_sentence(sentence: str, max_len: int = 90) -> str:
+    if len(sentence) <= max_len:
+        return sentence
+    return sentence[: max_len - 1].rstrip() + "…"
+
+
 def build_context(company_name: str, texts: Iterable[str]) -> str:
     combined = "\n".join(texts)
-    sentences = split_sentences(combined)
+    raw_sentences = split_sentences(combined)
+    sentences = [s for s in raw_sentences if is_good_sentence(s)]
+    fallback = [s for s in raw_sentences if 10 <= len(s) <= 220][:3]
 
-    def collect(keywords: List[str], max_items: int = 3) -> List[str]:
+    def collect(keywords: List[str], max_items: int = 2) -> List[str]:
         hits = []
         for s in sentences:
             if any(k in s for k in keywords):
                 if s not in hits:
-                    hits.append(s)
+                    hits.append(truncate_sentence(s))
             if len(hits) >= max_items:
                 break
+        if not hits and fallback:
+            hits.append(truncate_sentence(fallback[0]))
         return hits
 
     sections = {
