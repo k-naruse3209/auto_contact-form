@@ -69,11 +69,12 @@ def render_dashboard(out_dir: str, output_path: str) -> None:
             cand_items.append(f"<div>{cand.get('url')}</div>")
         cand_html = "".join(cand_items) if cand_items else "-"
 
+        status_badge = f"<span class='pill{'' if status == 'ok' else ' warn'}'>{status}</span>"
         rows.append(
             "<tr>"
             f"<td>{name}</td>"
-            f"<td>{status}</td>"
-            f"<td>{form_url or '-'}</td>"
+            f"<td>{status_badge}</td>"
+            f"<td class='url'>{form_url or '-'}</td>"
             f"<td>{cand_html}</td>"
             f"<td>{field_html}</td>"
             "</tr>"
@@ -87,32 +88,138 @@ def render_dashboard(out_dir: str, output_path: str) -> None:
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Phase4 Form Dashboard</title>
   <style>
-    body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 24px; color: #222; }}
-    h1 {{ font-size: 20px; margin-bottom: 16px; }}
-    table {{ border-collapse: collapse; width: 100%; }}
-    th, td {{ border: 1px solid #ddd; padding: 8px; vertical-align: top; }}
-    th {{ background: #f5f5f5; text-align: left; }}
-    tr:nth-child(even) {{ background: #fafafa; }}
-    .status-ok {{ color: #0a7a2f; font-weight: 600; }}
-    .status-no_form {{ color: #b45309; font-weight: 600; }}
+    :root {{
+      --ink: #121212;
+      --muted: #4b5563;
+      --accent: #0f766e;
+      --accent-2: #c2410c;
+      --bg: #f6f5f2;
+      --card: #ffffff;
+      --line: #e5e7eb;
+      --shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    }}
+    * {{ box-sizing: border-box; }}
+    body {{
+      margin: 0;
+      font-family: "Space Grotesk", "Hiragino Sans", "Noto Sans JP", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, #e9e5dc 0%, transparent 60%),
+        radial-gradient(900px 600px at 110% 0%, #e6f2f0 0%, transparent 55%),
+        var(--bg);
+    }}
+    header {{
+      padding: 28px 32px 8px;
+    }}
+    h1 {{
+      font-size: 28px;
+      margin: 0 0 8px;
+      letter-spacing: 0.02em;
+    }}
+    .sub {{
+      color: var(--muted);
+      margin: 0 0 16px;
+      font-size: 13px;
+    }}
+    .wrap {{
+      padding: 0 32px 32px;
+    }}
+    table {{
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      border-radius: 12px;
+      overflow: hidden;
+    }}
+    thead th {{
+      position: sticky;
+      top: 0;
+      background: #f9fafb;
+      text-align: left;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #6b7280;
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+    }}
+    tbody td {{
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      font-size: 13px;
+    }}
+    tbody tr:hover {{
+      background: #f8fafc;
+    }}
+    .pill {{
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 12px;
+      background: #e2f3f1;
+      color: var(--accent);
+    }}
+    .pill.warn {{
+      background: #ffedd5;
+      color: var(--accent-2);
+    }}
+    .url {{
+      color: #1f2937;
+      word-break: break-all;
+    }}
+    details {{
+      border: 1px dashed #d1d5db;
+      border-radius: 10px;
+      padding: 8px 10px;
+      background: #fbfbfb;
+    }}
+    details summary {{
+      cursor: pointer;
+      color: #111827;
+      font-weight: 600;
+    }}
+    pre {{
+      white-space: pre-wrap;
+      font-family: "IBM Plex Mono", "Menlo", monospace;
+      font-size: 12px;
+      color: #374151;
+    }}
+    @media (max-width: 900px) {{
+      header, .wrap {{ padding: 16px; }}
+      thead th:nth-child(4), thead th:nth-child(5) {{
+        display: none;
+      }}
+      tbody td:nth-child(4), tbody td:nth-child(5) {{
+        display: none;
+      }}
+    }}
   </style>
 </head>
 <body>
-  <h1>Phase4 Form Dashboard</h1>
-  <table>
-    <thead>
-      <tr>
-        <th>Company</th>
-        <th>Status</th>
-        <th>Form URL</th>
-        <th>Contact Candidates (top 3)</th>
-        <th>Planned Fields (value)</th>
-      </tr>
-    </thead>
-    <tbody>
-      {"".join(rows)}
-    </tbody>
-  </table>
+  <header>
+    <h1>Phase4 Form Dashboard</h1>
+    <p class="sub">確認用: どの会社に何のフィールドがあり、どの値が入るかを一覧化</p>
+  </header>
+  <div class="wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Company</th>
+          <th>Status</th>
+          <th>Form URL</th>
+          <th>Contact Candidates (top 3)</th>
+          <th>Planned Fields (value)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {"".join(rows)}
+      </tbody>
+    </table>
+  </div>
 </body>
 </html>
 """
