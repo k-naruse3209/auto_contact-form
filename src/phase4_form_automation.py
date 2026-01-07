@@ -43,6 +43,8 @@ INTERNAL_HINTS = [
 FIELD_KEYWORDS = {
     "company": ["会社", "会社名", "法人", "法人名", "貴社", "company", "organization"],
     "name": ["氏名", "担当", "お名前", "名前", "onamae", "name"],
+    "name_first": ["名", "first", "first_name", "given", "given_name"],
+    "name_last": ["姓", "苗字", "名字", "last", "last_name", "family", "family_name"],
     "name_kana": ["カナ", "フリガナ", "ふりがな", "kana"],
     "name_hiragana": ["ひらがな", "hiragana"],
     "email": ["メール", "mail", "mailadd", "email"],
@@ -78,6 +80,8 @@ COMPANY_CONTACT_OVERRIDES = {
 SENDER_VALUES = {
     "company": "株式会社DXAIソリューションズ",
     "name": "成瀬　恵介",
+    "name_first": "恵介",
+    "name_last": "成瀬",
     "name_kana": "ナルセ ケイスケ",
     "name_hiragana": "なるせ　けいすけ",
     "email": "k-naruse@dxai-sol.co.jp",
@@ -218,6 +222,22 @@ def build_selector(el, soup: BeautifulSoup) -> Optional[str]:
     return None
 
 
+def is_split_name_label(text: str, key: str) -> bool:
+    cleaned = re.sub(r"\s+", "", text)
+    lowered = cleaned.lower()
+    if any(tag in lowered for tag in ["first", "given", "last", "family"]):
+        return True
+    if any(tag in cleaned for tag in ["会社", "貴社", "お名前", "名前"]):
+        return False
+    if key == "name_first":
+        short = cleaned.replace("必須", "").replace("：", "").replace(":", "")
+        return short.startswith("名") and len(short) <= 4
+    if key == "name_last":
+        short = cleaned.replace("必須", "").replace("：", "").replace(":", "")
+        return (short.startswith("姓") or short.startswith("苗字") or short.startswith("名字")) and len(short) <= 4
+    return False
+
+
 def extract_select_options(el: BeautifulSoup) -> List[str]:
     options = []
     for opt in el.find_all("option"):
@@ -255,10 +275,16 @@ def score_field(text: str, field_key: str, el_type: str) -> int:
     for kw in FIELD_KEYWORDS[field_key]:
         if kw.lower() in text.lower():
             score += 3
+    lowered = text.lower()
+    if field_key == "name" and any(tag in lowered for tag in ["first", "last", "given", "family", "姓", "名"]):
+        score -= 2
+    if field_key == "name_first" and any(tag in lowered for tag in ["last", "family", "姓"]):
+        score -= 2
+    if field_key == "name_last" and any(tag in lowered for tag in ["first", "given", "名"]):
+        score -= 2
     if field_key == "email" and el_type == "email":
         score += 2
     if field_key == "email":
-        lowered = text.lower()
         if any(tag in lowered for tag in ["confirm", "conf", "再入力", "確認"]):
             score -= 5
     if field_key == "phone" and el_type in ("tel", "phone"):
@@ -286,6 +312,9 @@ def map_form_fields(form: BeautifulSoup) -> Dict[str, Dict[str, str]]:
             name = el.get("name", "")
             ident = el.get("id", "")
             text = " ".join([label, placeholder, name, ident])
+            if key in ("name_first", "name_last"):
+                if not is_split_name_label(" ".join([label, placeholder]), key):
+                    continue
             if key == "inquiry_type" and not any(k in text for k in FIELD_KEYWORDS["inquiry_type"]):
                 continue
             score = score_field(text, key, el_type)

@@ -9,6 +9,14 @@
       "selector": "[name='last_name']",
       "value": "成瀬　恵介"
     },
+    "name_first": {
+      "selector": "[name='first_name']",
+      "value": "恵介"
+    },
+    "name_last": {
+      "selector": "[name='last_name']",
+      "value": "成瀬"
+    },
     "email": {
       "selector": "[name='mail']",
       "value": "k-naruse@dxai-sol.co.jp"

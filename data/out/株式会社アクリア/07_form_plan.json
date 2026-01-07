@@ -6,8 +6,16 @@
       "value": "株式会社DXAIソリューションズ"
     },
     "name": {
-      "selector": "[name='name1-1']",
+      "selector": "[name='name2-1']",
       "value": "成瀬　恵介"
+    },
+    "name_first": {
+      "selector": "[name='name1-2']",
+      "value": "恵介"
+    },
+    "name_last": {
+      "selector": "[name='name1-1']",
+      "value": "成瀬"
     },
     "email": {
       "selector": "[name='email']",

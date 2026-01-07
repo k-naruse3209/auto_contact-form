@@ -14,6 +14,8 @@
 - Added non-official keyword penalties and skipped negative-domain candidates when choosing the official URL.
 - Added dashboard actions to open forms and copy a fill script for manual execution in the form tab.
 - Set Phase4 company field to always use sender company (DXAI) instead of target company name.
+- Added Phase4 mapping for split first/last name fields to populate 成瀬/恵介 separately when available.
+- Limited split-name mapping to explicit 姓/名 labels (or first/last equivalents) to avoid mis-filling generic name fields.
 
 ## 2026-01-06
 - Added `AGENTS.md` and `CLAUDE.md` to capture Codex/Claude project instructions.
