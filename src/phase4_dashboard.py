@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import re
+from urllib.parse import quote
 from pathlib import Path
 from typing import Dict, List
 
@@ -24,6 +25,19 @@ def render_dashboard(out_dir: str, output_path: str) -> None:
 
     rows: List[str] = []
     scripts: List[str] = []
+    bookmarklet_code = (
+        "(function(){try{const data=JSON.parse(window.name||\"{}\");"
+        "if(!data||!Object.keys(data).length){alert('No plan data in window.name. Use Open+Prep first.');return;}"
+        "const results=[];const trigger=(el)=>{try{el.dispatchEvent(new Event('input',{bubbles:true}));"
+        "el.dispatchEvent(new Event('change',{bubbles:true}));}catch(e){}};"
+        "Object.entries(data).forEach(([key,item])=>{const el=document.querySelector(item.selector);"
+        "if(!el){results.push({key,selector:item.selector,ok:false});return;}"
+        "if(el.type==='checkbox'||el.type==='radio'){el.checked=!!item.value;}else{el.value=item.value;}"
+        "trigger(el);results.push({key,selector:item.selector,ok:true});});"
+        "console.table(results);alert('Auto-fill done. Check fields, then submit manually.');}"
+        "catch(e){alert('Auto-fill error: '+e.message);}})();"
+    )
+    bookmarklet_href = "javascript:" + quote(bookmarklet_code, safe="(){}[];:,.!'")
     for idx, company_dir in enumerate(company_dirs, start=1):
         name = company_dir.name
         plan_path = company_dir / "07_form_plan.json"
@@ -86,9 +100,10 @@ def render_dashboard(out_dir: str, output_path: str) -> None:
         )
         status_badge = f"<span class='pill{'' if status == 'ok' else ' warn'}'>{status}</span>"
         open_link = (
-            f"<a class='action' href='{form_url}' target='_blank' rel='noopener'>Open</a>"
-            if form_url
-            else "-"
+            f"<button class='action' data-action='open-prep' data-plan-id='plan-{plan_id}' "
+            f"data-form-url='{form_url}'>Open+Prep</button>"
+            if form_url and plan_values
+            else (f"<a class='action' href='{form_url}' target='_blank' rel='noopener'>Open</a>" if form_url else "-")
         )
         copy_btn = (
             f"<button class='action ghost' data-plan-id='plan-{plan_id}'>Copy Fill Script</button>"
@@ -169,6 +184,33 @@ def render_dashboard(out_dir: str, output_path: str) -> None:
       margin-bottom: 6px;
     }}
     .guide-note {{
+      font-size: 12px;
+      color: var(--muted);
+    }}
+    .bookmarklet-wrap {{
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }}
+    .bookmarklet-label {{
+      font-size: 12px;
+      color: var(--muted);
+    }}
+    .bookmarklet {{
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff7ed;
+      color: #9a3412;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 12px;
+    }}
+    .bookmarklet-note {{
       font-size: 12px;
       color: var(--muted);
     }}
@@ -275,14 +317,19 @@ def render_dashboard(out_dir: str, output_path: str) -> None:
     <h1>Phase4 Form Dashboard</h1>
     <p class="sub">確認用: どの会社に何のフィールドがあり、どの値が入るかを一覧化</p>
     <div class="guide">
-      <div class="guide-title">使い方（送信直前まで）</div>
+      <div class="guide-title">使い方（送信直前まで / コンソール不要）</div>
       <ol>
-        <li>Actions の <b>Open</b> でフォームを開く</li>
-        <li><b>Copy Fill Script</b> を押す</li>
-        <li>フォームのタブで開発者ツール → Console に貼り付けて実行</li>
+        <li><b>DXAI Fill</b> をブックマークバーにドラッグ</li>
+        <li>Actions の <b>Open+Prep</b> でフォームを開く</li>
+        <li>フォームのタブでブックマークの <b>DXAI Fill</b> をクリック</li>
         <li>入力内容を確認して、最後の送信は手動で行う</li>
       </ol>
-      <div class="guide-note">注: ダッシュボードから直接入力はできません（ブラウザの制約）。</div>
+      <div class="guide-note">注: ブラウザの制約でダッシュボードから直接入力はできません。</div>
+    </div>
+    <div class="bookmarklet-wrap">
+      <span class="bookmarklet-label">ブックマークレット:</span>
+      <a class="bookmarklet" href="{bookmarklet_href}">DXAI Fill</a>
+      <span class="bookmarklet-note">← これをブックマークバーへドラッグ</span>
     </div>
   </header>
   <div class="wrap">
@@ -351,6 +398,34 @@ def render_dashboard(out_dir: str, output_path: str) -> None:
           btn.textContent = 'Copy Fill Script';
         }}, 1200);
       }});
+    }});
+
+    document.addEventListener('click', (event) => {{
+      const btn = event.target.closest('button[data-action=\"open-prep\"]');
+      if (!btn) return;
+      const planId = btn.dataset.planId;
+      const formUrl = btn.dataset.formUrl;
+      if (!planId || !formUrl) return;
+      const scriptEl = document.getElementById(planId);
+      if (!scriptEl) return;
+      let plan = {{}};
+      try {{
+        plan = JSON.parse(scriptEl.textContent || '{{}}');
+      }} catch (e) {{
+        plan = {{}};
+      }}
+      const win = window.open(formUrl, '_blank', 'noopener');
+      if (!win) {{
+        alert('Popup blocked. Allow popups and try again.');
+        return;
+      }}
+      try {{
+        win.name = JSON.stringify(plan || {{}});
+      }} catch (e) {{}}
+      btn.textContent = 'Opened';
+      setTimeout(() => {{
+        btn.textContent = 'Open+Prep';
+      }}, 1200);
     }});
   </script>
 </body>

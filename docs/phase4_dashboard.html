@@ -64,6 +64,33 @@
       font-size: 12px;
       color: var(--muted);
     }
+    .bookmarklet-wrap {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .bookmarklet-label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .bookmarklet {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff7ed;
+      color: #9a3412;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 12px;
+    }
+    .bookmarklet-note {
+      font-size: 12px;
+      color: var(--muted);
+    }
     .wrap {
       padding: 0 32px 32px;
     }
@@ -167,14 +194,19 @@
     <h1>Phase4 Form Dashboard</h1>
     <p class="sub">確認用: どの会社に何のフィールドがあり、どの値が入るかを一覧化</p>
     <div class="guide">
-      <div class="guide-title">使い方（送信直前まで）</div>
+      <div class="guide-title">使い方（送信直前まで / コンソール不要）</div>
       <ol>
-        <li>Actions の <b>Open</b> でフォームを開く</li>
-        <li><b>Copy Fill Script</b> を押す</li>
-        <li>フォームのタブで開発者ツール → Console に貼り付けて実行</li>
+        <li><b>DXAI Fill</b> をブックマークバーにドラッグ</li>
+        <li>Actions の <b>Open+Prep</b> でフォームを開く</li>
+        <li>フォームのタブでブックマークの <b>DXAI Fill</b> をクリック</li>
         <li>入力内容を確認して、最後の送信は手動で行う</li>
       </ol>
-      <div class="guide-note">注: ダッシュボードから直接入力はできません（ブラウザの制約）。</div>
+      <div class="guide-note">注: ブラウザの制約でダッシュボードから直接入力はできません。</div>
+    </div>
+    <div class="bookmarklet-wrap">
+      <span class="bookmarklet-label">ブックマークレット:</span>
+      <a class="bookmarklet" href="javascript:(function(){try{const%20data%3DJSON.parse(window.name%7C%7C%22{}%22);if(!data%7C%7C!Object.keys(data).length){alert('No%20plan%20data%20in%20window.name.%20Use%20Open%2BPrep%20first.');return;}const%20results%3D[];const%20trigger%3D(el)%3D%3E{try{el.dispatchEvent(new%20Event('input',{bubbles:true}));el.dispatchEvent(new%20Event('change',{bubbles:true}));}catch(e){}};Object.entries(data).forEach(([key,item])%3D%3E{const%20el%3Ddocument.querySelector(item.selector);if(!el){results.push({key,selector:item.selector,ok:false});return;}if(el.type%3D%3D%3D'checkbox'%7C%7Cel.type%3D%3D%3D'radio'){el.checked%3D!!item.value;}else{el.value%3Ditem.value;}trigger(el);results.push({key,selector:item.selector,ok:true});});console.table(results);alert('Auto-fill%20done.%20Check%20fields,%20then%20submit%20manually.');}catch(e){alert('Auto-fill%20error:%20'%2Be.message);}})();">DXAI Fill</a>
+      <span class="bookmarklet-note">← これをブックマークバーへドラッグ</span>
     </div>
   </header>
   <div class="wrap">
@@ -190,7 +222,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr><td>Booost株式会社</td><td><span class='pill'>ok</span></td><td class='url'>https://booost-tech.com/contact/contact-other/</td><td class='actions'><a class='action' href='https://booost-tech.com/contact/contact-other/' target='_blank' rel='noopener'>Open</a> <button class='action ghost' data-plan-id='plan-booost'>Copy Fill Script</button></td><td><div>https://booost-tech.com/contact/contact-other/</div><div>https://booost.inc/contact</div><div>https://booost.inc/contact/</div></td><td><div><b>company</b>: 株式会社DXAIソリューションズ</div><div><b>department</b>: ソリューション事業部</div><div><b>name</b>: 成瀬　恵介</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>website</b>: https://dxai-sol.co.jp/</div><div><b>privacy_consent</b>: True</div><details><summary><b>message</b>: 件名： 【ご提案】Booost株式会社における「AI実装・オフショア連携」について  本文：  Booost株式会社 ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイトを拝見し、「テクノロジーを...</summary><pre>件名： 【ご提案】Booost株式会社における「AI実装・オフショア連携」について
+        <tr><td>Booost株式会社</td><td><span class='pill'>ok</span></td><td class='url'>https://booost-tech.com/contact/contact-other/</td><td class='actions'><button class='action' data-action='open-prep' data-plan-id='plan-booost' data-form-url='https://booost-tech.com/contact/contact-other/'>Open+Prep</button> <button class='action ghost' data-plan-id='plan-booost'>Copy Fill Script</button></td><td><div>https://booost-tech.com/contact/contact-other/</div><div>https://booost.inc/contact</div><div>https://booost.inc/contact/</div></td><td><div><b>company</b>: 株式会社DXAIソリューションズ</div><div><b>department</b>: ソリューション事業部</div><div><b>name</b>: 成瀬　恵介</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>website</b>: https://dxai-sol.co.jp/</div><div><b>privacy_consent</b>: True</div><details><summary><b>message</b>: 件名： 【ご提案】Booost株式会社における「AI実装・オフショア連携」について  本文：  Booost株式会社 ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイトを拝見し、「テクノロジーを...</summary><pre>件名： 【ご提案】Booost株式会社における「AI実装・オフショア連携」について
 
 本文：
 
@@ -230,7 +262,7 @@ Tel: 050-1722-6417
 URL: https://dxai-sol.co.jp/
 【東京本社】 〒104-0033 東京都中央区新川1-3-21 BIZSMART 4階
 【開発拠点】 ベトナム（ハノイ・ダナン）、大分県（姫島サテライト）
-</pre></details><div><b>name_first</b>: 恵介</div><div><b>name_last</b>: 成瀬</div></td></tr><tr><td>Horizon-Head--Company</td><td><span class='pill'>ok</span></td><td class='url'>https://horizonhead.co.jp/contact/</td><td class='actions'><a class='action' href='https://horizonhead.co.jp/contact/' target='_blank' rel='noopener'>Open</a> <button class='action ghost' data-plan-id='plan-horizon-head-company'>Copy Fill Script</button></td><td><div>https://horizonhead.co.jp/contact/</div><div>https://horizonhead.co.jp/privacy/privacy_contact.html</div><div>https://horizonhead.co.jp/contact</div></td><td><div><b>name</b>: 成瀬　恵介</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>postal_code</b>: 104-0033</div><div><b>address</b>: 〒東京都中央区新川1−3−21　Biz Station 茅場町</div><div><b>privacy_consent</b>: True</div><details><summary><b>message</b>: 件名： 【ご提案】Horizon Head & Companyにおける「AI実装・オフショア連携」について  本文：  Horizon Head & Company ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。...</summary><pre>件名： 【ご提案】Horizon Head & Companyにおける「AI実装・オフショア連携」について
+</pre></details><div><b>name_first</b>: 恵介</div><div><b>name_last</b>: 成瀬</div></td></tr><tr><td>Horizon-Head--Company</td><td><span class='pill'>ok</span></td><td class='url'>https://horizonhead.co.jp/contact/</td><td class='actions'><button class='action' data-action='open-prep' data-plan-id='plan-horizon-head-company' data-form-url='https://horizonhead.co.jp/contact/'>Open+Prep</button> <button class='action ghost' data-plan-id='plan-horizon-head-company'>Copy Fill Script</button></td><td><div>https://horizonhead.co.jp/contact/</div><div>https://horizonhead.co.jp/privacy/privacy_contact.html</div><div>https://horizonhead.co.jp/contact</div></td><td><div><b>name</b>: 成瀬　恵介</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>postal_code</b>: 104-0033</div><div><b>address</b>: 〒東京都中央区新川1−3−21　Biz Station 茅場町</div><div><b>privacy_consent</b>: True</div><details><summary><b>message</b>: 件名： 【ご提案】Horizon Head & Companyにおける「AI実装・オフショア連携」について  本文：  Horizon Head & Company ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。...</summary><pre>件名： 【ご提案】Horizon Head & Companyにおける「AI実装・オフショア連携」について
 
 本文：
 
@@ -270,7 +302,7 @@ Tel: 050-1722-6417
 URL: https://dxai-sol.co.jp/
 【東京本社】 〒104-0033 東京都中央区新川1-3-21 BIZSMART 4階
 【開発拠点】 ベトナム（ハノイ・ダナン）、大分県（姫島サテライト）
-</pre></details></td></tr><tr><td>Kitamura--Company</td><td><span class='pill'>ok</span></td><td class='url'>https://ykaci.com/contact/</td><td class='actions'><a class='action' href='https://ykaci.com/contact/' target='_blank' rel='noopener'>Open</a> <button class='action ghost' data-plan-id='plan-kitamura-company'>Copy Fill Script</button></td><td><div>https://ykaci.com/contact/</div><div>https://ykaci.com/contact/complete.html</div><div>https://ykaci.com/contact/confirm.html</div></td><td><div><b>name</b>: 成瀬　恵介</div><div><b>name_kana</b>: ナルセ ケイスケ</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>postal_code</b>: 104-0033</div><div><b>address</b>: 〒東京都中央区新川1−3−21　Biz Station 茅場町</div><div><b>privacy_consent</b>: True</div><details><summary><b>message</b>: 件名： 【ご提案】Kitamura & Companyにおける「AI実装・オフショア連携」について  本文：  Kitamura & Company ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWeb...</summary><pre>件名： 【ご提案】Kitamura & Companyにおける「AI実装・オフショア連携」について
+</pre></details></td></tr><tr><td>Kitamura--Company</td><td><span class='pill'>ok</span></td><td class='url'>https://ykaci.com/contact/</td><td class='actions'><button class='action' data-action='open-prep' data-plan-id='plan-kitamura-company' data-form-url='https://ykaci.com/contact/'>Open+Prep</button> <button class='action ghost' data-plan-id='plan-kitamura-company'>Copy Fill Script</button></td><td><div>https://ykaci.com/contact/</div><div>https://ykaci.com/contact/complete.html</div><div>https://ykaci.com/contact/confirm.html</div></td><td><div><b>name</b>: 成瀬　恵介</div><div><b>name_kana</b>: ナルセ ケイスケ</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>postal_code</b>: 104-0033</div><div><b>address</b>: 〒東京都中央区新川1−3−21　Biz Station 茅場町</div><div><b>privacy_consent</b>: True</div><details><summary><b>message</b>: 件名： 【ご提案】Kitamura & Companyにおける「AI実装・オフショア連携」について  本文：  Kitamura & Company ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWeb...</summary><pre>件名： 【ご提案】Kitamura & Companyにおける「AI実装・オフショア連携」について
 
 本文：
 
@@ -310,7 +342,7 @@ Tel: 050-1722-6417
 URL: https://dxai-sol.co.jp/
 【東京本社】 〒104-0033 東京都中央区新川1-3-21 BIZSMART 4階
 【開発拠点】 ベトナム（ハノイ・ダナン）、大分県（姫島サテライト）
-</pre></details></td></tr><tr><td>YRSKコンサルティング</td><td><span class='pill'>ok</span></td><td class='url'>http://yrsk.jp/contact/</td><td class='actions'><a class='action' href='http://yrsk.jp/contact/' target='_blank' rel='noopener'>Open</a> <button class='action ghost' data-plan-id='plan-yrsk'>Copy Fill Script</button></td><td><div>http://yrsk.jp/contact/</div><div>http://yrsk.jp/contact</div><div>http://yrsk.jp/inquiry</div></td><td><div><b>name</b>: 成瀬　恵介</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><details><summary><b>message</b>: 件名： 【ご提案】YRSKコンサルティングにおける「AI実装・オフショア連携」について  本文：  YRSKコンサルティング ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイトを拝見し、「クライ...</summary><pre>件名： 【ご提案】YRSKコンサルティングにおける「AI実装・オフショア連携」について
+</pre></details></td></tr><tr><td>YRSKコンサルティング</td><td><span class='pill'>ok</span></td><td class='url'>http://yrsk.jp/contact/</td><td class='actions'><button class='action' data-action='open-prep' data-plan-id='plan-yrsk' data-form-url='http://yrsk.jp/contact/'>Open+Prep</button> <button class='action ghost' data-plan-id='plan-yrsk'>Copy Fill Script</button></td><td><div>http://yrsk.jp/contact/</div><div>http://yrsk.jp/contact</div><div>http://yrsk.jp/inquiry</div></td><td><div><b>name</b>: 成瀬　恵介</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><details><summary><b>message</b>: 件名： 【ご提案】YRSKコンサルティングにおける「AI実装・オフショア連携」について  本文：  YRSKコンサルティング ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイトを拝見し、「クライ...</summary><pre>件名： 【ご提案】YRSKコンサルティングにおける「AI実装・オフショア連携」について
 
 本文：
 
@@ -350,7 +382,7 @@ Tel: 050-1722-6417
 URL: https://dxai-sol.co.jp/
 【東京本社】 〒104-0033 東京都中央区新川1-3-21 BIZSMART 4階
 【開発拠点】 ベトナム（ハノイ・ダナン）、大分県（姫島サテライト）
-</pre></details></td></tr><tr><td>かなえ経営株式会社</td><td><span class='pill'>ok</span></td><td class='url'>https://kanae-keiei.co.jp/contact/</td><td class='actions'><a class='action' href='https://kanae-keiei.co.jp/contact/' target='_blank' rel='noopener'>Open</a> <button class='action ghost' data-plan-id='plan-company-5'>Copy Fill Script</button></td><td><div>https://kanae-keiei.co.jp/contact/</div><div>https://kanae-keiei.co.jp/contact</div><div>https://kanae-keiei.co.jp/inquiry</div></td><td><div><b>company</b>: 株式会社DXAIソリューションズ</div><div><b>name</b>: 成瀬　恵介</div><div><b>name_kana</b>: ナルセ ケイスケ</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>privacy_consent</b>: True</div><details><summary><b>message</b>: 件名： 【ご提案】かなえ経営株式会社における「AI実装・オフショア連携」について  本文：  かなえ経営株式会社 ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイトを拝見し、「単なる税務・会計サ...</summary><pre>件名： 【ご提案】かなえ経営株式会社における「AI実装・オフショア連携」について
+</pre></details></td></tr><tr><td>かなえ経営株式会社</td><td><span class='pill'>ok</span></td><td class='url'>https://kanae-keiei.co.jp/contact/</td><td class='actions'><button class='action' data-action='open-prep' data-plan-id='plan-company-5' data-form-url='https://kanae-keiei.co.jp/contact/'>Open+Prep</button> <button class='action ghost' data-plan-id='plan-company-5'>Copy Fill Script</button></td><td><div>https://kanae-keiei.co.jp/contact/</div><div>https://kanae-keiei.co.jp/contact</div><div>https://kanae-keiei.co.jp/inquiry</div></td><td><div><b>company</b>: 株式会社DXAIソリューションズ</div><div><b>name</b>: 成瀬　恵介</div><div><b>name_kana</b>: ナルセ ケイスケ</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>privacy_consent</b>: True</div><details><summary><b>message</b>: 件名： 【ご提案】かなえ経営株式会社における「AI実装・オフショア連携」について  本文：  かなえ経営株式会社 ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイトを拝見し、「単なる税務・会計サ...</summary><pre>件名： 【ご提案】かなえ経営株式会社における「AI実装・オフショア連携」について
 
 本文：
 
@@ -390,7 +422,7 @@ Tel: 050-1722-6417
 URL: https://dxai-sol.co.jp/
 【東京本社】 〒104-0033 東京都中央区新川1-3-21 BIZSMART 4階
 【開発拠点】 ベトナム（ハノイ・ダナン）、大分県（姫島サテライト）
-</pre></details></td></tr><tr><td>アクティヴァーチコンサルティング</td><td><span class='pill'>ok</span></td><td class='url'>https://activarch.co.jp/contact/</td><td class='actions'><a class='action' href='https://activarch.co.jp/contact/' target='_blank' rel='noopener'>Open</a> <button class='action ghost' data-plan-id='plan-company-6'>Copy Fill Script</button></td><td><div>https://activarch.co.jp/contact/</div><div>https://activarch.co.jp/contact</div><div>https://activarch.co.jp/inquiry</div></td><td><div><b>company</b>: 株式会社DXAIソリューションズ</div><div><b>name</b>: 成瀬　恵介</div><div><b>name_kana</b>: ナルセ ケイスケ</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>privacy_consent</b>: True</div><details><summary><b>message</b>: 件名： 【ご提案】アクティヴァーチ・コンサルティングにおける「AI実装・オフショア連携」について  本文：  アクティヴァーチ・コンサルティング ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイ...</summary><pre>件名： 【ご提案】アクティヴァーチ・コンサルティングにおける「AI実装・オフショア連携」について
+</pre></details></td></tr><tr><td>アクティヴァーチコンサルティング</td><td><span class='pill'>ok</span></td><td class='url'>https://activarch.co.jp/contact/</td><td class='actions'><button class='action' data-action='open-prep' data-plan-id='plan-company-6' data-form-url='https://activarch.co.jp/contact/'>Open+Prep</button> <button class='action ghost' data-plan-id='plan-company-6'>Copy Fill Script</button></td><td><div>https://activarch.co.jp/contact/</div><div>https://activarch.co.jp/contact</div><div>https://activarch.co.jp/inquiry</div></td><td><div><b>company</b>: 株式会社DXAIソリューションズ</div><div><b>name</b>: 成瀬　恵介</div><div><b>name_kana</b>: ナルセ ケイスケ</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>privacy_consent</b>: True</div><details><summary><b>message</b>: 件名： 【ご提案】アクティヴァーチ・コンサルティングにおける「AI実装・オフショア連携」について  本文：  アクティヴァーチ・コンサルティング ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイ...</summary><pre>件名： 【ご提案】アクティヴァーチ・コンサルティングにおける「AI実装・オフショア連携」について
 
 本文：
 
@@ -430,7 +462,7 @@ URL: https://dxai-sol.co.jp/
 【開発拠点】 ベトナム（ハノイ・ダナン）、大分県（姫島サテライト）
 
 ※本メールがご不要な場合は、大変お手数ですがその旨をご返信いただけますと幸いです。
-</pre></details></td></tr><tr><td>アールコンサルティング株式会社</td><td><span class='pill'>ok</span></td><td class='url'>https://www.r-consul.co.jp/inquiry/index.html</td><td class='actions'><a class='action' href='https://www.r-consul.co.jp/inquiry/index.html' target='_blank' rel='noopener'>Open</a> <button class='action ghost' data-plan-id='plan-company-7'>Copy Fill Script</button></td><td><div>https://www.r-consul.co.jp/inquiry/index.html</div><div>https://www.r-consul.co.jp/business_support/index.html</div><div>https://www.r-consul.co.jp/contact</div></td><td><div><b>company</b>: 株式会社DXAIソリューションズ</div><div><b>department</b>: ソリューション事業部</div><div><b>name</b>: 成瀬　恵介</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>postal_code</b>: 104-0033</div><div><b>address</b>: 〒東京都中央区新川1−3−21　Biz Station 茅場町</div><div><b>website</b>: https://dxai-sol.co.jp/</div><details><summary><b>message</b>: 件名： 【ご提案】アールコンサルティング株式会社における「AI実装・オフショア連携」について  本文：  アールコンサルティング株式会社 ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイトを拝見...</summary><pre>件名： 【ご提案】アールコンサルティング株式会社における「AI実装・オフショア連携」について
+</pre></details></td></tr><tr><td>アールコンサルティング株式会社</td><td><span class='pill'>ok</span></td><td class='url'>https://www.r-consul.co.jp/inquiry/index.html</td><td class='actions'><button class='action' data-action='open-prep' data-plan-id='plan-company-7' data-form-url='https://www.r-consul.co.jp/inquiry/index.html'>Open+Prep</button> <button class='action ghost' data-plan-id='plan-company-7'>Copy Fill Script</button></td><td><div>https://www.r-consul.co.jp/inquiry/index.html</div><div>https://www.r-consul.co.jp/business_support/index.html</div><div>https://www.r-consul.co.jp/contact</div></td><td><div><b>company</b>: 株式会社DXAIソリューションズ</div><div><b>department</b>: ソリューション事業部</div><div><b>name</b>: 成瀬　恵介</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>postal_code</b>: 104-0033</div><div><b>address</b>: 〒東京都中央区新川1−3−21　Biz Station 茅場町</div><div><b>website</b>: https://dxai-sol.co.jp/</div><details><summary><b>message</b>: 件名： 【ご提案】アールコンサルティング株式会社における「AI実装・オフショア連携」について  本文：  アールコンサルティング株式会社 ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイトを拝見...</summary><pre>件名： 【ご提案】アールコンサルティング株式会社における「AI実装・オフショア連携」について
 
 本文：
 
@@ -470,7 +502,7 @@ Tel: 050-1722-6417
 URL: https://dxai-sol.co.jp/
 【東京本社】 〒104-0033 東京都中央区新川1-3-21 BIZSMART 4階
 【開発拠点】 ベトナム（ハノイ・ダナン）、大分県（姫島サテライト）
-</pre></details></td></tr><tr><td>トリプルグッド株式会社</td><td><span class='pill'>ok</span></td><td class='url'>https://www.triplegood.co.jp/inquiry</td><td class='actions'><a class='action' href='https://www.triplegood.co.jp/inquiry' target='_blank' rel='noopener'>Open</a> <button class='action ghost' data-plan-id='plan-company-8'>Copy Fill Script</button></td><td><div>https://www.triplegood.co.jp/inquiry/</div><div>https://www.triplegood.co.jp/inquiry</div><div>https://www.triplegood.co.jp/contact</div></td><td><div><b>name</b>: 成瀬　恵介</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>privacy_consent</b>: True</div><details><summary><b>message</b>: 件名： 【ご提案】トリプルグッド株式会社における「AI実装・オフショア連携」について  本文：  トリプルグッド株式会社 ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイトを拝見し、「あらゆる専...</summary><pre>件名： 【ご提案】トリプルグッド株式会社における「AI実装・オフショア連携」について
+</pre></details></td></tr><tr><td>トリプルグッド株式会社</td><td><span class='pill'>ok</span></td><td class='url'>https://www.triplegood.co.jp/inquiry</td><td class='actions'><button class='action' data-action='open-prep' data-plan-id='plan-company-8' data-form-url='https://www.triplegood.co.jp/inquiry'>Open+Prep</button> <button class='action ghost' data-plan-id='plan-company-8'>Copy Fill Script</button></td><td><div>https://www.triplegood.co.jp/inquiry/</div><div>https://www.triplegood.co.jp/inquiry</div><div>https://www.triplegood.co.jp/contact</div></td><td><div><b>name</b>: 成瀬　恵介</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>privacy_consent</b>: True</div><details><summary><b>message</b>: 件名： 【ご提案】トリプルグッド株式会社における「AI実装・オフショア連携」について  本文：  トリプルグッド株式会社 ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイトを拝見し、「あらゆる専...</summary><pre>件名： 【ご提案】トリプルグッド株式会社における「AI実装・オフショア連携」について
 
 本文：
 
@@ -510,7 +542,7 @@ Tel: 050-1722-6417
 URL: https://dxai-sol.co.jp/
 【東京本社】 〒104-0033 東京都中央区新川1-3-21 BIZSMART 4階
 【開発拠点】 ベトナム（ハノイ・ダナン）、大分県（姫島サテライト）
-</pre></details><div><b>inquiry_type</b>: 業務提携に関するお問い合わせ</div></td></tr><tr><td>株式会社KANSOH</td><td><span class='pill warn'>no_form</span></td><td class='url'>https://www.kan-so.co.jp/contact/</td><td class='actions'><a class='action' href='https://www.kan-so.co.jp/contact/' target='_blank' rel='noopener'>Open</a> -</td><td><div>https://www.kan-so.co.jp/contact/</div><div>https://www.kan-so.co.jp/contact</div><div>https://www.kan-so.co.jp/inquiry</div></td><td>-</td></tr><tr><td>株式会社アクリア</td><td><span class='pill'>ok</span></td><td class='url'>https://www.accrea.co.jp/contact/</td><td class='actions'><a class='action' href='https://www.accrea.co.jp/contact/' target='_blank' rel='noopener'>Open</a> <button class='action ghost' data-plan-id='plan-company-10'>Copy Fill Script</button></td><td><div>https://www.accrea.co.jp/contact/</div><div>https://www.accrea.co.jp/contact</div><div>https://www.accrea.co.jp/service/institutional_accounting/j-sox_support/</div></td><td><div><b>company</b>: 株式会社DXAIソリューションズ</div><div><b>name</b>: 成瀬　恵介</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>address</b>: 〒東京都中央区新川1−3−21　Biz Station 茅場町</div><details><summary><b>message</b>: 件名： 【ご提案】株式会社アクリアにおける「AI実装・オフショア連携」について  本文：  株式会社アクリア ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイトを拝見し、「日本の経理部の改革に貢...</summary><pre>件名： 【ご提案】株式会社アクリアにおける「AI実装・オフショア連携」について
+</pre></details><div><b>inquiry_type</b>: 業務提携に関するお問い合わせ</div></td></tr><tr><td>株式会社KANSOH</td><td><span class='pill warn'>no_form</span></td><td class='url'>https://www.kan-so.co.jp/contact/</td><td class='actions'><a class='action' href='https://www.kan-so.co.jp/contact/' target='_blank' rel='noopener'>Open</a> -</td><td><div>https://www.kan-so.co.jp/contact/</div><div>https://www.kan-so.co.jp/contact</div><div>https://www.kan-so.co.jp/inquiry</div></td><td>-</td></tr><tr><td>株式会社アクリア</td><td><span class='pill'>ok</span></td><td class='url'>https://www.accrea.co.jp/contact/</td><td class='actions'><button class='action' data-action='open-prep' data-plan-id='plan-company-10' data-form-url='https://www.accrea.co.jp/contact/'>Open+Prep</button> <button class='action ghost' data-plan-id='plan-company-10'>Copy Fill Script</button></td><td><div>https://www.accrea.co.jp/contact/</div><div>https://www.accrea.co.jp/contact</div><div>https://www.accrea.co.jp/service/institutional_accounting/j-sox_support/</div></td><td><div><b>company</b>: 株式会社DXAIソリューションズ</div><div><b>name</b>: 成瀬　恵介</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>address</b>: 〒東京都中央区新川1−3−21　Biz Station 茅場町</div><details><summary><b>message</b>: 件名： 【ご提案】株式会社アクリアにおける「AI実装・オフショア連携」について  本文：  株式会社アクリア ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイトを拝見し、「日本の経理部の改革に貢...</summary><pre>件名： 【ご提案】株式会社アクリアにおける「AI実装・オフショア連携」について
 
 本文：
 
@@ -550,7 +582,7 @@ URL: https://dxai-sol.co.jp/
 【開発拠点】 ベトナム（ハノイ・ダナン）、大分県（姫島サテライト）
 
 ※今後、このような案内が不要な場合は、お手数ですが本メールへの返信にてその旨をお知らせいただけますと幸いです。
-</pre></details><div><b>name_first</b>: 恵介</div><div><b>name_last</b>: 成瀬</div></td></tr><tr><td>株式会社カサマ</td><td><span class='pill'>ok</span></td><td class='url'>https://www.tesagyou.jp/blog/contact/</td><td class='actions'><a class='action' href='https://www.tesagyou.jp/blog/contact/' target='_blank' rel='noopener'>Open</a> <button class='action ghost' data-plan-id='plan-company-11'>Copy Fill Script</button></td><td><div>https://www.tesagyou.jp/blog/contact/</div><div>https://www.tesagyou.jp/contact.html</div><div>https://www.tesagyou.jp/contact</div></td><td><div><b>company</b>: 株式会社DXAIソリューションズ</div><div><b>name</b>: 成瀬　恵介</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>privacy_consent</b>: True</div><details><summary><b>message</b>: 件名： 【ご提案】株式会社カサマにおける「AI実装・オフショア連携」について  本文：  株式会社カサマ ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイトを拝見し、「商品やサービスの思いを届け...</summary><pre>件名： 【ご提案】株式会社カサマにおける「AI実装・オフショア連携」について
+</pre></details><div><b>name_first</b>: 恵介</div><div><b>name_last</b>: 成瀬</div></td></tr><tr><td>株式会社カサマ</td><td><span class='pill'>ok</span></td><td class='url'>https://www.tesagyou.jp/blog/contact/</td><td class='actions'><button class='action' data-action='open-prep' data-plan-id='plan-company-11' data-form-url='https://www.tesagyou.jp/blog/contact/'>Open+Prep</button> <button class='action ghost' data-plan-id='plan-company-11'>Copy Fill Script</button></td><td><div>https://www.tesagyou.jp/blog/contact/</div><div>https://www.tesagyou.jp/contact.html</div><div>https://www.tesagyou.jp/contact</div></td><td><div><b>company</b>: 株式会社DXAIソリューションズ</div><div><b>name</b>: 成瀬　恵介</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>privacy_consent</b>: True</div><details><summary><b>message</b>: 件名： 【ご提案】株式会社カサマにおける「AI実装・オフショア連携」について  本文：  株式会社カサマ ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイトを拝見し、「商品やサービスの思いを届け...</summary><pre>件名： 【ご提案】株式会社カサマにおける「AI実装・オフショア連携」について
 
 本文：
 
@@ -590,7 +622,7 @@ URL: https://dxai-sol.co.jp/
 【開発拠点】 ベトナム（ハノイ・ダナン）、大分県（姫島サテライト）
 
 ※本メールがご不要な場合は、大変お手数ですがその旨をご返信いただけますと幸いです。以降の連絡を控えさせていただきます。
-</pre></details></td></tr><tr><td>株式会社コスモ経営</td><td><span class='pill'>ok</span></td><td class='url'>http://www.cosmo-m.jp/inquiry/</td><td class='actions'><a class='action' href='http://www.cosmo-m.jp/inquiry/' target='_blank' rel='noopener'>Open</a> <button class='action ghost' data-plan-id='plan-company-12'>Copy Fill Script</button></td><td><div>http://www.cosmo-m.jp/inquiry/</div><div>http://www.cosmo-m.jp/contact</div><div>http://www.cosmo-m.jp/contact/</div></td><td><div><b>company</b>: 株式会社DXAIソリューションズ</div><div><b>department</b>: ソリューション事業部</div><div><b>name</b>: 成瀬　恵介</div><div><b>name_kana</b>: ナルセ ケイスケ</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>postal_code</b>: 104-0033</div><div><b>address</b>: 〒東京都中央区新川1−3−21　Biz Station 茅場町</div><details><summary><b>message</b>: 件名： 【ご提案】株式会社コスモ経営における「AI実装・オフショア連携」について  本文：  株式会社コスモ経営 ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイトを拝見し、「生産財マーケティン...</summary><pre>件名： 【ご提案】株式会社コスモ経営における「AI実装・オフショア連携」について
+</pre></details></td></tr><tr><td>株式会社コスモ経営</td><td><span class='pill'>ok</span></td><td class='url'>http://www.cosmo-m.jp/inquiry/</td><td class='actions'><button class='action' data-action='open-prep' data-plan-id='plan-company-12' data-form-url='http://www.cosmo-m.jp/inquiry/'>Open+Prep</button> <button class='action ghost' data-plan-id='plan-company-12'>Copy Fill Script</button></td><td><div>http://www.cosmo-m.jp/inquiry/</div><div>http://www.cosmo-m.jp/contact</div><div>http://www.cosmo-m.jp/contact/</div></td><td><div><b>company</b>: 株式会社DXAIソリューションズ</div><div><b>department</b>: ソリューション事業部</div><div><b>name</b>: 成瀬　恵介</div><div><b>name_kana</b>: ナルセ ケイスケ</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>postal_code</b>: 104-0033</div><div><b>address</b>: 〒東京都中央区新川1−3−21　Biz Station 茅場町</div><details><summary><b>message</b>: 件名： 【ご提案】株式会社コスモ経営における「AI実装・オフショア連携」について  本文：  株式会社コスモ経営 ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイトを拝見し、「生産財マーケティン...</summary><pre>件名： 【ご提案】株式会社コスモ経営における「AI実装・オフショア連携」について
 
 本文：
 
@@ -630,7 +662,7 @@ Tel: 050-1722-6417
 URL: https://dxai-sol.co.jp/
 【東京本社】 〒104-0033 東京都中央区新川1-3-21 BIZSMART 4階
 【開発拠点】 ベトナム（ハノイ・ダナン）、大分県（姫島サテライト）
-</pre></details><div><b>inquiry_type</b>: その他</div></td></tr><tr><td>株式会社ソリューション</td><td><span class='pill'>ok</span></td><td class='url'>https://www.solution-gr.co.jp/recruit/contact/</td><td class='actions'><a class='action' href='https://www.solution-gr.co.jp/recruit/contact/' target='_blank' rel='noopener'>Open</a> <button class='action ghost' data-plan-id='plan-company-13'>Copy Fill Script</button></td><td><div>https://www.solution-gr.co.jp/contact</div><div>https://www.solution-gr.co.jp/recruit/contact/</div><div>https://www.solution-gr.co.jp/recruit/contact</div></td><td><div><b>name</b>: 成瀬　恵介</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><details><summary><b>message</b>: 件名： 【ご提案】株式会社ソリューションにおける「AI実装・オフショア連携」について  本文：  株式会社ソリューション ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイトを拝見し、「多岐にわた...</summary><pre>件名： 【ご提案】株式会社ソリューションにおける「AI実装・オフショア連携」について
+</pre></details><div><b>inquiry_type</b>: その他</div></td></tr><tr><td>株式会社ソリューション</td><td><span class='pill'>ok</span></td><td class='url'>https://www.solution-gr.co.jp/recruit/contact/</td><td class='actions'><button class='action' data-action='open-prep' data-plan-id='plan-company-13' data-form-url='https://www.solution-gr.co.jp/recruit/contact/'>Open+Prep</button> <button class='action ghost' data-plan-id='plan-company-13'>Copy Fill Script</button></td><td><div>https://www.solution-gr.co.jp/contact</div><div>https://www.solution-gr.co.jp/recruit/contact/</div><div>https://www.solution-gr.co.jp/recruit/contact</div></td><td><div><b>name</b>: 成瀬　恵介</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><details><summary><b>message</b>: 件名： 【ご提案】株式会社ソリューションにおける「AI実装・オフショア連携」について  本文：  株式会社ソリューション ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイトを拝見し、「多岐にわた...</summary><pre>件名： 【ご提案】株式会社ソリューションにおける「AI実装・オフショア連携」について
 
 本文：
 
@@ -670,7 +702,7 @@ Tel: 050-1722-6417
 URL: https://dxai-sol.co.jp/
 【東京本社】 〒104-0033 東京都中央区新川1-3-21 BIZSMART 4階
 【開発拠点】 ベトナム（ハノイ・ダナン）、大分県（姫島サテライト）
-</pre></details></td></tr><tr><td>株式会社フラッグシップ経営</td><td><span class='pill'>ok</span></td><td class='url'>https://flagship-keiei.co.jp/contact/</td><td class='actions'><a class='action' href='https://flagship-keiei.co.jp/contact/' target='_blank' rel='noopener'>Open</a> <button class='action ghost' data-plan-id='plan-company-14'>Copy Fill Script</button></td><td><div>https://flagship-keiei.co.jp/contact/</div><div>https://flagship-keiei.co.jp/support/</div><div>https://flagship-keiei.co.jp/support/revitalization/</div></td><td><div><b>company</b>: 株式会社DXAIソリューションズ</div><div><b>name</b>: 成瀬　恵介</div><div><b>name_kana</b>: ナルセ ケイスケ</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>postal_code</b>: 104-0033</div><div><b>address</b>: 〒東京都中央区新川1−3−21　Biz Station 茅場町</div><details><summary><b>message</b>: 件名： 【ご提案】株式会社フラッグシップ経営における「AI実装・オフショア連携」について  本文：  株式会社フラッグシップ経営 ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイトを拝見し、「経...</summary><pre>件名： 【ご提案】株式会社フラッグシップ経営における「AI実装・オフショア連携」について
+</pre></details></td></tr><tr><td>株式会社フラッグシップ経営</td><td><span class='pill'>ok</span></td><td class='url'>https://flagship-keiei.co.jp/contact/</td><td class='actions'><button class='action' data-action='open-prep' data-plan-id='plan-company-14' data-form-url='https://flagship-keiei.co.jp/contact/'>Open+Prep</button> <button class='action ghost' data-plan-id='plan-company-14'>Copy Fill Script</button></td><td><div>https://flagship-keiei.co.jp/contact/</div><div>https://flagship-keiei.co.jp/support/</div><div>https://flagship-keiei.co.jp/support/revitalization/</div></td><td><div><b>company</b>: 株式会社DXAIソリューションズ</div><div><b>name</b>: 成瀬　恵介</div><div><b>name_kana</b>: ナルセ ケイスケ</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>postal_code</b>: 104-0033</div><div><b>address</b>: 〒東京都中央区新川1−3−21　Biz Station 茅場町</div><details><summary><b>message</b>: 件名： 【ご提案】株式会社フラッグシップ経営における「AI実装・オフショア連携」について  本文：  株式会社フラッグシップ経営 ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWebサイトを拝見し、「経...</summary><pre>件名： 【ご提案】株式会社フラッグシップ経営における「AI実装・オフショア連携」について
 
 本文：
 
@@ -703,7 +735,7 @@ URL: https://dxai-sol.co.jp/
 【東京本社】 〒104-0033 東京都中央区新川1-3-21 BIZSMART 4階 【開発拠点】 ベトナム（ハノイ・ダナン）、大分県（姫島サテライト）
 
 ※本メールがご不要な場合は、大変お手数ですがその旨をご返信いただけますと幸いです。以降の配信を停止いたします。
-</pre></details></td></tr><tr><td>経営コンサルティングアソシエーション</td><td><span class='pill'>ok</span></td><td class='url'>https://association.co.jp/wp/contact/</td><td class='actions'><a class='action' href='https://association.co.jp/wp/contact/' target='_blank' rel='noopener'>Open</a> <button class='action ghost' data-plan-id='plan-company-15'>Copy Fill Script</button></td><td><div>https://association.co.jp/wp/contact/</div><div>https://association.co.jp/contact</div><div>https://association.co.jp/contact/</div></td><td><div><b>company</b>: 株式会社DXAIソリューションズ</div><div><b>name</b>: 成瀬　恵介</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>address</b>: 〒東京都中央区新川1−3−21　Biz Station 茅場町</div><details><summary><b>message</b>: 件名： 【ご提案】経営コンサルティングアソシエーションにおける「AI実装・オフショア連携」について  本文：  経営コンサルティングアソシエーション ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWeb...</summary><pre>件名： 【ご提案】経営コンサルティングアソシエーションにおける「AI実装・オフショア連携」について
+</pre></details></td></tr><tr><td>経営コンサルティングアソシエーション</td><td><span class='pill'>ok</span></td><td class='url'>https://association.co.jp/wp/contact/</td><td class='actions'><button class='action' data-action='open-prep' data-plan-id='plan-company-15' data-form-url='https://association.co.jp/wp/contact/'>Open+Prep</button> <button class='action ghost' data-plan-id='plan-company-15'>Copy Fill Script</button></td><td><div>https://association.co.jp/wp/contact/</div><div>https://association.co.jp/contact</div><div>https://association.co.jp/contact/</div></td><td><div><b>company</b>: 株式会社DXAIソリューションズ</div><div><b>name</b>: 成瀬　恵介</div><div><b>email</b>: k-naruse@dxai-sol.co.jp</div><div><b>phone</b>: 05017226417</div><div><b>address</b>: 〒東京都中央区新川1−3−21　Biz Station 茅場町</div><details><summary><b>message</b>: 件名： 【ご提案】経営コンサルティングアソシエーションにおける「AI実装・オフショア連携」について  本文：  経営コンサルティングアソシエーション ご担当者様  突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。  貴社のWeb...</summary><pre>件名： 【ご提案】経営コンサルティングアソシエーションにおける「AI実装・オフショア連携」について
 
 本文：
 
@@ -796,6 +828,34 @@ URL: https://dxai-sol.co.jp/
           btn.textContent = 'Copy Fill Script';
         }, 1200);
       });
+    });
+
+    document.addEventListener('click', (event) => {
+      const btn = event.target.closest('button[data-action="open-prep"]');
+      if (!btn) return;
+      const planId = btn.dataset.planId;
+      const formUrl = btn.dataset.formUrl;
+      if (!planId || !formUrl) return;
+      const scriptEl = document.getElementById(planId);
+      if (!scriptEl) return;
+      let plan = {};
+      try {
+        plan = JSON.parse(scriptEl.textContent || '{}');
+      } catch (e) {
+        plan = {};
+      }
+      const win = window.open(formUrl, '_blank', 'noopener');
+      if (!win) {
+        alert('Popup blocked. Allow popups and try again.');
+        return;
+      }
+      try {
+        win.name = JSON.stringify(plan || {});
+      } catch (e) {}
+      btn.textContent = 'Opened';
+      setTimeout(() => {
+        btn.textContent = 'Open+Prep';
+      }, 1200);
     });
   </script>
 </body>

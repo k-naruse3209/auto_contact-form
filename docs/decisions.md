@@ -16,6 +16,7 @@
 - Set Phase4 company field to always use sender company (DXAI) instead of target company name.
 - Added Phase4 mapping for split first/last name fields to populate 成瀬/恵介 separately when available.
 - Limited split-name mapping to explicit 姓/名 labels (or first/last equivalents) to avoid mis-filling generic name fields.
+- Added a dashboard bookmarklet flow (Open+Prep + DXAI Fill) to auto-fill without using the console.
 
 ## 2026-01-06
 - Added `AGENTS.md` and `CLAUDE.md` to capture Codex/Claude project instructions.
