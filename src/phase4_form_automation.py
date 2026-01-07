@@ -31,7 +31,7 @@ CONTACT_KEYWORDS = [
 ]
 
 FIELD_KEYWORDS = {
-    "company": ["会社", "法人", "貴社", "company", "organization"],
+    "company": ["会社", "法人", "法人名", "貴社", "company", "organization"],
     "name": ["氏名", "担当", "お名前", "name"],
     "name_kana": ["カナ", "フリガナ", "ふりがな", "kana"],
     "name_hiragana": ["ひらがな", "hiragana"],
@@ -44,6 +44,10 @@ FIELD_KEYWORDS = {
     "role": ["役職", "role", "職種"],
     "website": ["URL", "website", "サイト", "web"],
     "privacy_consent": ["プライバシーポリシー", "個人情報", "privacy", "policy", "同意"],
+}
+
+COMPANY_CONTACT_OVERRIDES = {
+    "Booost株式会社": ["https://booost-tech.com/contact/contact-other/"],
 }
 
 SENDER_VALUES = {
@@ -250,6 +254,8 @@ def run_phase4(out_dir: str, max_companies: int = 50) -> None:
             candidates = collect_contact_candidates(home_html, base_url)
             for url in add_common_contact_paths(base_url):
                 candidates.append(CandidatePage(url=url, confidence=0.5, evidence=["common_path"]))
+            for url in COMPANY_CONTACT_OVERRIDES.get(company_name, []):
+                candidates.append(CandidatePage(url=url, confidence=2.0, evidence=["override"]))
 
             # de-dup and keep same domain
             uniq = {}
