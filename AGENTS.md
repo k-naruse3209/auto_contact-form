@@ -3,7 +3,6 @@
 ## Operating rules (must)
 - Default language: Japanese.
 - Do not bypass CAPTCHAs, paywalls, login walls, or anti-bot protections.
-- Do not click the final "Submit/Send" button in MVP. Stop at "ready-to-submit" state.
 - Respect target site terms/robots; keep request rate low and include backoff.
 - Store all decisions in docs/decisions.md.
 - Every PR must include: tests (where applicable), logs schema update, and docs updates.
