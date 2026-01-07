@@ -36,9 +36,17 @@ def render_dashboard(out_dir: str, output_path: str) -> None:
         status = "ok" if form_url and fields else "no_form"
 
         field_items = []
-        for key, meta in fields.items():
+        order = [k for k in fields.keys() if k != "message"] + (["message"] if "message" in fields else [])
+        for key in order:
+            meta = fields.get(key, {})
             val = meta.get("value")
-            field_items.append(f"<div><b>{key}</b>: {val}</div>")
+            if key == "message" and val:
+                preview = str(val).replace("\n", " ")[:140]
+                field_items.append(
+                    f"<details><summary><b>{key}</b>: {preview}...</summary><pre>{val}</pre></details>"
+                )
+            else:
+                field_items.append(f"<div><b>{key}</b>: {val}</div>")
         field_html = "".join(field_items) if field_items else "-"
 
         cand_items = []
