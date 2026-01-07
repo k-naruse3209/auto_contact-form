@@ -39,6 +39,7 @@ cp .env.example .env
 GOOGLE_CSE_API_KEY="your_actual_api_key_here"
 GOOGLE_CSE_CX="your_actual_cx_here"
 GEMINI_API_KEY="your_actual_gemini_api_key_here"
+GEMINI_MODEL="gemini-3-flash-preview"
 ```
 
 ### 3. ディレクトリ構成

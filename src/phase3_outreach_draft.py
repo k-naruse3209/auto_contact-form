@@ -111,7 +111,7 @@ def generate_draft_llm(prompt: str) -> str:
     api_key = os.getenv("GEMINI_API_KEY", "").strip()
     if not api_key:
         raise SystemExit("Missing GEMINI_API_KEY in .env")
-    model = os.getenv("GEMINI_MODEL", "gemini-3.0-flash").strip()
+    model = os.getenv("GEMINI_MODEL", "gemini-3-flash-preview").strip()
     from google import genai
     client = genai.Client(api_key=api_key)
     response = client.models.generate_content(model=model, contents=prompt)

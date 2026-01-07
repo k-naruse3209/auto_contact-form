@@ -21,3 +21,4 @@
 - Updated outreach template to the provided draft and aligned Phase3 generation with it.
 - Tightened Phase2 extraction filters and added meta/title fallback for cleaner evidence.
 - Switched Phase3 drafting to Gemini API (Gemini 3 Flash) and added API key configuration.
+- Updated default Gemini model to `gemini-3-flash-preview`.
