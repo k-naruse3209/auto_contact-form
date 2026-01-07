@@ -172,6 +172,7 @@ def build_queries(company_name: str, hint_industry: Optional[str] = None) -> Lis
         f"{company_name} 公式サイト",
         f"{company_name} 会社概要",
         f"{company_name} 事業内容",
+        f"{company_name} コンサル会社",
     ]
     if company_name == "Kitamura & Company":
         queries.append("株式会社Kitamura&Company 公式サイト")
@@ -179,7 +180,7 @@ def build_queries(company_name: str, hint_industry: Optional[str] = None) -> Lis
         queries.append(f"{company_name} {hint_industry}")
     # Add a generic consulting hint for ambiguous English names
     if re.search(r"[A-Za-z&]", company_name):
-        queries.append(f"{company_name} コンサル会社")
+        queries.append(f"{company_name} consulting")
     # de-dup
     seen = set()
     deduped = []

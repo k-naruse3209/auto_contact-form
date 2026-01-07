@@ -5,6 +5,7 @@
 - Allowed Phase4 contact overrides to use a different domain when explicitly configured.
 - Narrowed Phase4 missing-required checks to name/email/message to avoid false positives when no company field exists.
 - Added optional Phase4 company allowlist support for targeted reruns.
+- Added a default Phase1 query that appends "コンサル会社" to the company name.
 
 ## 2026-01-06
 - Added `AGENTS.md` and `CLAUDE.md` to capture Codex/Claude project instructions.
