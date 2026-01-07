@@ -44,7 +44,21 @@ FIELD_KEYWORDS = {
     "role": ["役職", "role", "職種"],
     "website": ["URL", "website", "サイト", "web"],
     "privacy_consent": ["プライバシーポリシー", "個人情報", "privacy", "policy", "同意"],
-    "inquiry_type": ["お問合せの種類", "お問い合わせ項目", "問合せ種別", "問合せ項目", "問い合わせ種別", "問い合わせ項目", "種別", "カテゴリ", "category", "inquiry type"],
+    "inquiry_type": [
+        "お問合せの種類",
+        "お問い合わせ項目",
+        "問合せ種別",
+        "問合せ項目",
+        "問い合わせ種別",
+        "問い合わせ項目",
+        "問合せ",
+        "問い合わ",
+        "問い合せ",
+        "種別",
+        "カテゴリ",
+        "category",
+        "inquiry type",
+    ],
 }
 
 COMPANY_CONTACT_OVERRIDES = {
@@ -64,6 +78,8 @@ SENDER_VALUES = {
     "website": "https://dxai-sol.co.jp/",
     "inquiry_type": "業務提携",
 }
+
+INQUIRY_PREFER = ["業務提携", "協業", "その他"]
 
 
 @dataclass
@@ -150,6 +166,34 @@ def build_selector(el, soup: BeautifulSoup) -> Optional[str]:
     return None
 
 
+def extract_select_options(el: BeautifulSoup) -> List[str]:
+    options = []
+    for opt in el.find_all("option"):
+        text = normalize_text(opt.get_text(" ", strip=True))
+        if text:
+            options.append(text)
+    return options
+
+
+def extract_radio_options(form: BeautifulSoup, name: str) -> List[str]:
+    options = []
+    inputs = form.find_all("input", attrs={"name": name, "type": "radio"})
+    for inp in inputs:
+        label = get_label_text(inp)
+        value = normalize_text(label or inp.get("value", ""))
+        if value:
+            options.append(value)
+    return options
+
+
+def choose_inquiry_option(options: List[str]) -> str:
+    for pref in INQUIRY_PREFER:
+        for opt in options:
+            if pref in opt:
+                return opt
+    return options[0] if options else SENDER_VALUES.get("inquiry_type", "その他")
+
+
 def score_field(text: str, field_key: str, el_type: str) -> int:
     score = 0
     for kw in FIELD_KEYWORDS[field_key]:
@@ -186,7 +230,14 @@ def map_form_fields(form: BeautifulSoup) -> Dict[str, Dict[str, str]]:
         if best[1] is not None and best[0] > 0:
             selector = build_selector(best[1], form)
             if selector:
-                fields[key] = {"selector": selector}
+                entry = {"selector": selector}
+                if key == "inquiry_type":
+                    el = best[1]
+                    if el.name == "select":
+                        entry["options"] = extract_select_options(el)
+                    elif el.name == "input" and el.get("type") == "radio":
+                        entry["options"] = extract_radio_options(form, el.get("name", ""))
+                fields[key] = entry
     return fields
 
 
@@ -201,7 +252,8 @@ def build_plan(company_name: str, draft: str, form_url: str, fields: Dict[str, D
         elif key == "privacy_consent":
             value = True
         elif key == "inquiry_type":
-            value = SENDER_VALUES.get("inquiry_type")
+            options = meta.get("options", [])
+            value = choose_inquiry_option(options) if options else SENDER_VALUES.get("inquiry_type")
         else:
             value = SENDER_VALUES.get(key)
         if value:

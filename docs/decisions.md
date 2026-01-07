@@ -25,3 +25,4 @@
 - Ensured Phase3 loads `.env` before calling Gemini.
 - Implemented Phase4 contact candidate discovery and form plan generation.
 - Added a Phase4 dashboard generator for field/value review.
+- Added inquiry type mapping to prefer "業務提携/協業" and fallback to "その他".
