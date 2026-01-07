@@ -248,6 +248,10 @@ def map_form_fields(form: BeautifulSoup) -> Dict[str, Dict[str, str]]:
                     else:
                         continue
                 fields[key] = entry
+    # If inquiry_type collides with message field, drop it.
+    if "inquiry_type" in fields and "message" in fields:
+        if fields["inquiry_type"].get("selector") == fields["message"].get("selector"):
+            fields.pop("inquiry_type", None)
     return fields
 
 
