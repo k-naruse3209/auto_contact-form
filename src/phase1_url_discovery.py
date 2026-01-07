@@ -157,13 +157,26 @@ def google_cse_search(client: httpx.Client, api_key: str, cx: str, q: str, num: 
     r.raise_for_status()
     return r.json()
 
-def build_queries(company_name: str) -> List[str]:
+def build_queries(company_name: str, hint_industry: Optional[str] = None) -> List[str]:
     # Minimal set: keep cost controlled; expand later if needed
-    return [
+    queries = [
         f"{company_name} 公式サイト",
         f"{company_name} 会社概要",
         f"{company_name} 事業内容",
     ]
+    if hint_industry:
+        queries.append(f"{company_name} {hint_industry}")
+    # Add a generic consulting hint for ambiguous English names
+    if re.search(r"[A-Za-z&]", company_name):
+        queries.append(f"{company_name} コンサル会社")
+    # de-dup
+    seen = set()
+    deduped = []
+    for q in queries:
+        if q not in seen:
+            seen.add(q)
+            deduped.append(q)
+    return deduped
 
 def pick_best(company_name: str, items: List[Dict[str, Any]]) -> Tuple[Optional[Candidate], List[Candidate]]:
     company_norm = normalize_company(company_name)
@@ -220,7 +233,13 @@ def run_phase1(
 
             try:
                 all_items: List[Dict[str, Any]] = []
-                queries = build_queries(name)
+            hint = None
+            if "hint_industry" in df.columns:
+                try:
+                    hint = df.loc[df["company_name"] == name, "hint_industry"].dropna().astype(str).iloc[0]
+                except Exception:
+                    hint = None
+            queries = build_queries(name, hint_industry=hint)
                 for q in queries:
                     data = google_cse_search(client, api_key, cx, q, num=num)
                     items = data.get("items", []) or []
