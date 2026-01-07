@@ -39,6 +39,31 @@
       margin: 0 0 16px;
       font-size: 13px;
     }
+    .guide {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+      max-width: 720px;
+    }
+    .guide-title {
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .guide ol {
+      margin: 0 0 8px 18px;
+      padding: 0;
+      color: #1f2937;
+      font-size: 13px;
+    }
+    .guide li {
+      margin-bottom: 6px;
+    }
+    .guide-note {
+      font-size: 12px;
+      color: var(--muted);
+    }
     .wrap {
       padding: 0 32px 32px;
     }
@@ -141,7 +166,16 @@
   <header>
     <h1>Phase4 Form Dashboard</h1>
     <p class="sub">確認用: どの会社に何のフィールドがあり、どの値が入るかを一覧化</p>
-    <p class="sub">Copy Fill Scriptはフォームページを開いてブラウザのコンソールに貼り付けて実行してください。</p>
+    <div class="guide">
+      <div class="guide-title">使い方（送信直前まで）</div>
+      <ol>
+        <li>Actions の <b>Open</b> でフォームを開く</li>
+        <li><b>Copy Fill Script</b> を押す</li>
+        <li>フォームのタブで開発者ツール → Console に貼り付けて実行</li>
+        <li>入力内容を確認して、最後の送信は手動で行う</li>
+      </ol>
+      <div class="guide-note">注: ダッシュボードから直接入力はできません（ブラウザの制約）。</div>
+    </div>
   </header>
   <div class="wrap">
     <table>
