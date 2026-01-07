@@ -24,3 +24,4 @@
 - Updated default Gemini model to `gemini-3-flash-preview`.
 - Ensured Phase3 loads `.env` before calling Gemini.
 - Implemented Phase4 contact candidate discovery and form plan generation.
+- Added a Phase4 dashboard generator for field/value review.
