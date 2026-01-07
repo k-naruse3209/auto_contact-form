@@ -23,7 +23,7 @@ def run_summary(out_dir: str, output_csv: str) -> None:
             continue
         plan = read_json(plan_path)
         fields = plan.get("fields", {}) or {}
-        missing = [k for k in ["company", "name", "email", "message"] if k not in fields]
+        missing = [k for k in ["name", "email", "message"] if k not in fields]
         status = "ok" if not missing and fields else "missing_required"
         if plan.get("notes") and not fields:
             status = "no_form"

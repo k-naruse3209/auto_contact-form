@@ -41,11 +41,11 @@ INTERNAL_HINTS = [
 ]
 
 FIELD_KEYWORDS = {
-    "company": ["会社", "法人", "法人名", "貴社", "company", "organization"],
-    "name": ["氏名", "担当", "お名前", "name"],
+    "company": ["会社", "会社名", "法人", "法人名", "貴社", "company", "organization"],
+    "name": ["氏名", "担当", "お名前", "名前", "onamae", "name"],
     "name_kana": ["カナ", "フリガナ", "ふりがな", "kana"],
     "name_hiragana": ["ひらがな", "hiragana"],
-    "email": ["メール", "mail", "email"],
+    "email": ["メール", "mail", "mailadd", "email"],
     "message": ["内容", "お問い合わせ", "問合せ", "本文", "message", "相談"],
     "phone": ["電話", "tel", "phone"],
     "address": ["住所", "所在地", "address"],
@@ -257,6 +257,10 @@ def score_field(text: str, field_key: str, el_type: str) -> int:
             score += 3
     if field_key == "email" and el_type == "email":
         score += 2
+    if field_key == "email":
+        lowered = text.lower()
+        if any(tag in lowered for tag in ["confirm", "conf", "再入力", "確認"]):
+            score -= 5
     if field_key == "phone" and el_type in ("tel", "phone"):
         score += 2
     if el_type in ("textarea",) and field_key == "message":
@@ -331,7 +335,7 @@ def build_plan(company_name: str, draft: str, form_url: str, fields: Dict[str, D
     }
 
 
-def run_phase4(out_dir: str, max_companies: int = 50) -> None:
+def run_phase4(out_dir: str, max_companies: int = 50, companies: Optional[List[str]] = None) -> None:
     """Phase4 implementation: form plan generation.
 
     Intended outputs per company:
@@ -340,7 +344,12 @@ def run_phase4(out_dir: str, max_companies: int = 50) -> None:
       - 08_ready_to_submit.png (not generated)
     """
     base = Path(out_dir)
-    company_dirs = sorted([p for p in base.iterdir() if p.is_dir()])[:max_companies]
+    all_dirs = [p for p in base.iterdir() if p.is_dir()]
+    if companies:
+        dir_map = {p.name: p for p in all_dirs}
+        company_dirs = [dir_map[name] for name in companies if name in dir_map]
+    else:
+        company_dirs = sorted(all_dirs)[:max_companies]
     print(f"[phase4] start: companies={len(company_dirs)}")
 
     with httpx.Client(headers={"User-Agent": USER_AGENT}) as client:
@@ -411,10 +420,10 @@ def run_phase4(out_dir: str, max_companies: int = 50) -> None:
             for url in COMPANY_CONTACT_OVERRIDES.get(company_name, []):
                 candidates.append(CandidatePage(url=url, confidence=2.0, evidence=["override"]))
 
-            # de-dup and keep same domain
+            # de-dup and keep same domain (allow explicit overrides)
             uniq = {}
             for c in candidates:
-                if registrable_domain(c.url) != regdom:
+                if "override" not in c.evidence and registrable_domain(c.url) != regdom:
                     continue
                 if c.url not in uniq or c.confidence > uniq[c.url].confidence:
                     uniq[c.url] = c

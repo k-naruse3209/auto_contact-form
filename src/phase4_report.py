@@ -18,7 +18,7 @@ def write_json(path: Path, obj: Dict) -> None:
 
 
 def required_missing(plan: Dict) -> List[str]:
-    required = ["company", "name", "email", "message"]
+    required = ["name", "email", "message"]
     fields = plan.get("fields", {}) or {}
     missing = [k for k in required if k not in fields]
     return missing

@@ -1,5 +1,11 @@
 # Decisions
 
+## 2026-01-07
+- Expanded Phase4 field keyword matching to cover "名前/onamae" and "mailadd" and deprioritize email confirmation fields.
+- Allowed Phase4 contact overrides to use a different domain when explicitly configured.
+- Narrowed Phase4 missing-required checks to name/email/message to avoid false positives when no company field exists.
+- Added optional Phase4 company allowlist support for targeted reruns.
+
 ## 2026-01-06
 - Added `AGENTS.md` and `CLAUDE.md` to capture Codex/Claude project instructions.
 - Relaxed pandas pin from `==2.1.4` to `>=2.2.0` in `requirements.txt`.
