@@ -316,7 +316,7 @@ def build_plan(company_name: str, draft: str, form_url: str, fields: Dict[str, D
     for key, meta in fields.items():
         value = None
         if key == "company":
-            value = company_name
+            value = SENDER_VALUES.get("company")
         elif key == "message":
             value = draft
         elif key == "privacy_consent":

@@ -13,6 +13,7 @@
 - Added consulting keyword boosts and non-consulting keyword penalties in Phase1 scoring to avoid mismatched industries.
 - Added non-official keyword penalties and skipped negative-domain candidates when choosing the official URL.
 - Added dashboard actions to open forms and copy a fill script for manual execution in the form tab.
+- Set Phase4 company field to always use sender company (DXAI) instead of target company name.
 
 ## 2026-01-06
 - Added `AGENTS.md` and `CLAUDE.md` to capture Codex/Claude project instructions.

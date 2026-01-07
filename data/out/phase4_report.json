@@ -1,0 +1,113 @@
+{
+  "results": [
+    {
+      "company": "Booost株式会社",
+      "status": "ok",
+      "form_url": "https://booost-tech.com/contact/contact-other/",
+      "missing_required": [],
+      "notes": "ready-to-submit screenshot not implemented"
+    },
+    {
+      "company": "Horizon-Head--Company",
+      "status": "ok",
+      "form_url": "https://horizonhead.co.jp/contact/",
+      "missing_required": [],
+      "notes": "ready-to-submit screenshot not implemented"
+    },
+    {
+      "company": "Kitamura--Company",
+      "status": "ok",
+      "form_url": "https://ykaci.com/contact/",
+      "missing_required": [],
+      "notes": "ready-to-submit screenshot not implemented"
+    },
+    {
+      "company": "YRSKコンサルティング",
+      "status": "ok",
+      "form_url": "http://yrsk.jp/contact/",
+      "missing_required": [],
+      "notes": "ready-to-submit screenshot not implemented"
+    },
+    {
+      "company": "かなえ経営株式会社",
+      "status": "ok",
+      "form_url": "https://kanae-keiei.co.jp/contact/",
+      "missing_required": [],
+      "notes": "ready-to-submit screenshot not implemented"
+    },
+    {
+      "company": "アクティヴァーチコンサルティング",
+      "status": "ok",
+      "form_url": "https://activarch.co.jp/contact/",
+      "missing_required": [],
+      "notes": "ready-to-submit screenshot not implemented"
+    },
+    {
+      "company": "アールコンサルティング株式会社",
+      "status": "ok",
+      "form_url": "https://www.r-consul.co.jp/inquiry/index.html",
+      "missing_required": [],
+      "notes": "ready-to-submit screenshot not implemented"
+    },
+    {
+      "company": "トリプルグッド株式会社",
+      "status": "ok",
+      "form_url": "https://www.triplegood.co.jp/inquiry",
+      "missing_required": [],
+      "notes": "ready-to-submit screenshot not implemented"
+    },
+    {
+      "company": "株式会社KANSOH",
+      "status": "no_form",
+      "form_url": "https://www.kan-so.co.jp/contact/",
+      "missing_required": [
+        "name",
+        "email",
+        "message"
+      ],
+      "notes": "form not detected"
+    },
+    {
+      "company": "株式会社アクリア",
+      "status": "ok",
+      "form_url": "https://www.accrea.co.jp/contact/",
+      "missing_required": [],
+      "notes": "ready-to-submit screenshot not implemented"
+    },
+    {
+      "company": "株式会社カサマ",
+      "status": "ok",
+      "form_url": "https://www.tesagyou.jp/blog/contact/",
+      "missing_required": [],
+      "notes": "ready-to-submit screenshot not implemented"
+    },
+    {
+      "company": "株式会社コスモ経営",
+      "status": "ok",
+      "form_url": "http://www.cosmo-m.jp/inquiry/",
+      "missing_required": [],
+      "notes": "ready-to-submit screenshot not implemented"
+    },
+    {
+      "company": "株式会社ソリューション",
+      "status": "ok",
+      "form_url": "https://www.solution-gr.co.jp/recruit/contact/",
+      "missing_required": [],
+      "notes": "ready-to-submit screenshot not implemented"
+    },
+    {
+      "company": "株式会社フラッグシップ経営",
+      "status": "ok",
+      "form_url": "https://flagship-keiei.co.jp/contact/",
+      "missing_required": [],
+      "notes": "ready-to-submit screenshot not implemented"
+    },
+    {
+      "company": "経営コンサルティングアソシエーション",
+      "status": "ok",
+      "form_url": "https://association.co.jp/wp/contact/",
+      "missing_required": [],
+      "notes": "ready-to-submit screenshot not implemented"
+    }
+  ]
+}
