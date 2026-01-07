@@ -22,3 +22,4 @@
 - Tightened Phase2 extraction filters and added meta/title fallback for cleaner evidence.
 - Switched Phase3 drafting to Gemini API (Gemini 3 Flash) and added API key configuration.
 - Updated default Gemini model to `gemini-3-flash-preview`.
+- Ensured Phase3 loads `.env` before calling Gemini.

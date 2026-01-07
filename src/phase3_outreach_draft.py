@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List
 
+from dotenv import load_dotenv
 
 @dataclass
 class EvidenceAnchor:
@@ -108,6 +109,7 @@ def build_prompt(company_name: str, sections: Dict[str, List[str]]) -> str:
 
 
 def generate_draft_llm(prompt: str) -> str:
+    load_dotenv()
     api_key = os.getenv("GEMINI_API_KEY", "").strip()
     if not api_key:
         raise SystemExit("Missing GEMINI_API_KEY in .env")
