@@ -40,6 +40,8 @@ INTERNAL_HINTS = [
     "company",
 ]
 
+EMAIL_CONFIRM_HINTS = ["confirm", "conf", "再入力", "確認", "check", "チェック"]
+
 FIELD_KEYWORDS = {
     "company": ["会社", "会社名", "法人", "法人名", "貴社", "company", "organization"],
     "name": ["氏名", "担当", "お名前", "名前", "onamae", "name"],
@@ -48,14 +50,7 @@ FIELD_KEYWORDS = {
     "name_kana": ["カナ", "フリガナ", "ふりがな", "kana"],
     "name_hiragana": ["ひらがな", "hiragana"],
     "email": ["メール", "mail", "mailadd", "email"],
-    "message": ["内容", "お問い合わせ", "問合せ", "本文", "message", "相談"],
-    "phone": ["電話", "tel", "phone"],
-    "address": ["住所", "所在地", "address"],
-    "postal_code": ["郵便番号", "〒", "zip", "postal"],
-    "department": ["部署", "department"],
-    "role": ["役職", "role", "職種"],
-    "website": ["URL", "website", "サイト", "web"],
-    "privacy_consent": ["プライバシーポリシー", "個人情報", "privacy", "policy", "同意"],
+    "email_confirm": ["メール", "mail", "mailadd", "email", "confirm", "conf", "再入力", "確認", "check", "チェック"],
     "inquiry_type": [
         "お問合せの種類",
         "お問い合わせ項目",
@@ -71,6 +66,14 @@ FIELD_KEYWORDS = {
         "category",
         "inquiry type",
     ],
+    "message": ["内容", "お問い合わせ", "問合せ", "本文", "message", "相談"],
+    "phone": ["電話", "tel", "phone"],
+    "address": ["住所", "所在地", "address"],
+    "postal_code": ["郵便番号", "〒", "zip", "postal"],
+    "department": ["部署", "department"],
+    "role": ["役職", "role", "職種"],
+    "website": ["URL", "website", "サイト", "web"],
+    "privacy_consent": ["プライバシーポリシー", "個人情報", "privacy", "policy", "同意"],
 }
 
 COMPANY_CONTACT_OVERRIDES = {
@@ -85,6 +88,7 @@ SENDER_VALUES = {
     "name_kana": "ナルセ ケイスケ",
     "name_hiragana": "なるせ　けいすけ",
     "email": "k-naruse@dxai-sol.co.jp",
+    "email_confirm": "k-naruse@dxai-sol.co.jp",
     "phone": "05017226417",
     "address": "〒東京都中央区新川1−3−21　Biz Station 茅場町",
     "postal_code": "104-0033",
@@ -218,7 +222,7 @@ def build_selector(el, soup: BeautifulSoup) -> Optional[str]:
     if el.has_attr("id") and el["id"]:
         return f"#{el['id']}"
     if el.has_attr("name") and el["name"]:
-        return f"[name='{el['name']}']"
+        return f"{el.name}[name='{el['name']}']"
     return None
 
 
@@ -285,8 +289,11 @@ def score_field(text: str, field_key: str, el_type: str) -> int:
     if field_key == "email" and el_type == "email":
         score += 2
     if field_key == "email":
-        if any(tag in lowered for tag in ["confirm", "conf", "再入力", "確認"]):
+        if any(tag in lowered for tag in EMAIL_CONFIRM_HINTS):
             score -= 5
+    if field_key == "email_confirm":
+        if any(tag in lowered for tag in EMAIL_CONFIRM_HINTS):
+            score += 2
     if field_key == "phone" and el_type in ("tel", "phone"):
         score += 2
     if el_type in ("textarea",) and field_key == "message":
@@ -312,6 +319,9 @@ def map_form_fields(form: BeautifulSoup) -> Dict[str, Dict[str, str]]:
             name = el.get("name", "")
             ident = el.get("id", "")
             text = " ".join([label, placeholder, name, ident])
+            if key == "email_confirm":
+                if not any(k in text for k in EMAIL_CONFIRM_HINTS):
+                    continue
             if key in ("name_first", "name_last"):
                 if not is_split_name_label(" ".join([label, placeholder]), key):
                     continue

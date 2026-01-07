@@ -17,6 +17,10 @@
 - Added Phase4 mapping for split first/last name fields to populate 成瀬/恵介 separately when available.
 - Limited split-name mapping to explicit 姓/名 labels (or first/last equivalents) to avoid mis-filling generic name fields.
 - Added a dashboard bookmarklet flow (Open+Prep + DXAI Fill) to auto-fill without using the console.
+- Updated Open+Prep to open about:blank first so window.name can carry plan data across popups.
+- Added Phase4 support for email confirmation fields and ensured inquiry type is filled before message.
+- Qualified selectors by tag name to handle duplicate field names (e.g., inquiry type select + message textarea).
+- Fixed email confirmation matching to use the current element text instead of stale label data.
 
 ## 2026-01-06
 - Added `AGENTS.md` and `CLAUDE.md` to capture Codex/Claude project instructions.

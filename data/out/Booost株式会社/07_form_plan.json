@@ -2,43 +2,43 @@
   "form_url": "https://booost-tech.com/contact/contact-other/",
   "fields": {
     "company": {
-      "selector": "[name='company']",
+      "selector": "input[name='company']",
       "value": "株式会社DXAIソリューションズ"
     },
     "name": {
-      "selector": "[name='last_name']",
+      "selector": "input[name='last_name']",
       "value": "成瀬　恵介"
     },
     "name_first": {
-      "selector": "[name='first_name']",
+      "selector": "input[name='first_name']",
       "value": "恵介"
     },
     "name_last": {
-      "selector": "[name='last_name']",
+      "selector": "input[name='last_name']",
       "value": "成瀬"
     },
     "email": {
-      "selector": "[name='mail']",
+      "selector": "input[name='mail']",
       "value": "k-naruse@dxai-sol.co.jp"
     },
     "message": {
-      "selector": "[name='textarea']",
+      "selector": "textarea[name='textarea']",
       "value": "件名： 【ご提案】Booost株式会社における「AI実装・オフショア連携」について\n\n本文：\n\nBooost株式会社 ご担当者様\n\n突然のご連絡失礼いたします。 株式会社DXAIソリューションズ（DXAI Sol）の成瀬と申します。\n\n貴社のWebサイトを拝見し、「テクノロジーを通じて社会の持続可能な発展に寄与し、新たな価値を創造されている」という点に深く感銘を受けております。 特に、貴社が強みとされる「専門性の高い知見を活かしたコンサルティングや、多角的なソリューション提供」といった領域や、DX推進現場において、「システム実装」や「AI開発」を担う技術パートナーとしてお力添えできればと思いご連絡いたしました。\n\n弊社は、東京とベトナム（ハノイ・ダナン）に拠点を置く開発会社です。 グループ全体で約30名規模の少数精鋭体制ながら、「日本品質×オフショアの機動力」を強みとしており、貴社の事業に以下のシナジーを生み出せると考えております。\n\n貴社PMO・コンサルティング案件の「実装パートナー」\n貴社が支援されるDXプロジェクトやPMO支援の現場において、戦略を実行に移すための「開発実働部隊」として機能します。弊社のベトナム拠点を活用いただくことで、国内相場よりも適正なコストで高品質なリソースを提供し、プロジェクトの利益率向上に貢献します。\n\n「AIソリューション」における技術連携\n貴社が注力される領域において、弊社の生成AI（LLM・マルチモーダルAI）技術がお役に立てる可能性があります。OCRや画像解析とLLMを組み合わせた高度なデータ処理エンジンの共同開発や、RAG（検索拡張生成）を用いたナレッジ活用システムの構築など、技術面での壁打ち相手としてもご活用いただけます。\n\nプラットフォーム事業への「オフショアチーム」提供\n貴社のIT人材プラットフォームにおけるリソースの選択肢の一つとして、弊社の「ラボ型開発チーム（ベトナム）」を組み込んでいただくご提案です。個人のフリーランス人材だけでなく、まとまった開発チームを柔軟に提供できるパートナーとして連携させていただくことで、クライアントへの提案の幅を広げます。\n\n【弊社の実績一例】\n・金融・建設業界向けクラウドシステム構築\n・多言語対応AIソリューション（自社開発：Lingua Flow）\n・ユニクロ様、楽天様、Sansan様など大手企業様向け開発実績多数\n\n貴社の理念に、弊社の「実装力」と「オフショアのメリット」を加えていただき、共にクライアント様の現場変革を加速させられれば幸いです。\n\nまずは会社概要や開発事例をお送りするだけでも構いませんし、オンラインでの情報交換（15〜30分程度）の機会をいただけますと幸いです。\n\nご検討のほど、何卒よろしくお願い申し上げます。\n\n※本メールが不要な場合は、大変お手数ですがその旨をご返信いただけますと幸いです。\n\nMail: k-naruse@dxai-sol.co.jp\nTel: 050-1722-6417\n株式会社DXAIソリューションズ (DXAI Solutions Co., Ltd.)\nURL: https://dxai-sol.co.jp/\n【東京本社】 〒104-0033 東京都中央区新川1-3-21 BIZSMART 4階\n【開発拠点】 ベトナム（ハノイ・ダナン）、大分県（姫島サテライト）\n"
     },
     "phone": {
-      "selector": "[name='tel']",
+      "selector": "input[name='tel']",
       "value": "05017226417"
     },
     "department": {
-      "selector": "[name='department']",
+      "selector": "input[name='department']",
       "value": "ソリューション事業部"
     },
     "website": {
-      "selector": "[name='url']",
+      "selector": "input[name='url']",
       "value": "https://dxai-sol.co.jp/"
     },
     "privacy_consent": {
-      "selector": "[name='your-acceptance']",
+      "selector": "input[name='your-acceptance']",
       "value": true
     }
   },

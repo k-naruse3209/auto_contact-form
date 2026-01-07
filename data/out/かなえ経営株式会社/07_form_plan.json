@@ -26,7 +26,7 @@
       "value": "05017226417"
     },
     "privacy_consent": {
-      "selector": "[name='privacy[]']",
+      "selector": "input[name='privacy[]']",
       "value": true
     }
   },

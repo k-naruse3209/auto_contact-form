@@ -64,10 +64,12 @@ def render_dashboard(out_dir: str, output_path: str) -> None:
             "name_kana",
             "name_hiragana",
             "email",
+            "email_confirm",
             "phone",
             "postal_code",
             "address",
             "website",
+            "inquiry_type",
             "privacy_consent",
             "message",
         ]
@@ -324,7 +326,7 @@ def render_dashboard(out_dir: str, output_path: str) -> None:
         <li>フォームのタブでブックマークの <b>DXAI Fill</b> をクリック</li>
         <li>入力内容を確認して、最後の送信は手動で行う</li>
       </ol>
-      <div class="guide-note">注: ブラウザの制約でダッシュボードから直接入力はできません。</div>
+      <div class="guide-note">注: ポップアップを許可してください（Open+Prepがブロックされるとデータが渡せません）。</div>
     </div>
     <div class="bookmarklet-wrap">
       <span class="bookmarklet-label">ブックマークレット:</span>
@@ -414,13 +416,16 @@ def render_dashboard(out_dir: str, output_path: str) -> None:
       }} catch (e) {{
         plan = {{}};
       }}
-      const win = window.open(formUrl, '_blank', 'noopener');
+      const win = window.open('about:blank', '_blank');
       if (!win) {{
         alert('Popup blocked. Allow popups and try again.');
         return;
       }}
       try {{
         win.name = JSON.stringify(plan || {{}});
+      }} catch (e) {{}}
+      try {{
+        win.location.href = formUrl;
       }} catch (e) {{}}
       btn.textContent = 'Opened';
       setTimeout(() => {{

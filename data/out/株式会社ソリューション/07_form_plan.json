@@ -2,7 +2,7 @@
   "form_url": "https://www.solution-gr.co.jp/recruit/contact/",
   "fields": {
     "name": {
-      "selector": "[name='name']",
+      "selector": "input[name='name']",
       "value": "成瀬　恵介"
     },
     "email": {
