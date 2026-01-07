@@ -33,19 +33,30 @@ CONTACT_KEYWORDS = [
 FIELD_KEYWORDS = {
     "company": ["会社", "法人", "貴社", "company", "organization"],
     "name": ["氏名", "担当", "お名前", "name"],
+    "name_kana": ["カナ", "フリガナ", "ふりがな", "kana"],
+    "name_hiragana": ["ひらがな", "hiragana"],
     "email": ["メール", "mail", "email"],
     "message": ["内容", "お問い合わせ", "問合せ", "本文", "message", "相談"],
     "phone": ["電話", "tel", "phone"],
+    "address": ["住所", "所在地", "address"],
+    "postal_code": ["郵便番号", "〒", "zip", "postal"],
     "department": ["部署", "department"],
     "role": ["役職", "role", "職種"],
     "website": ["URL", "website", "サイト", "web"],
+    "privacy_consent": ["プライバシーポリシー", "個人情報", "privacy", "policy", "同意"],
 }
 
 SENDER_VALUES = {
     "company": "株式会社DXAIソリューションズ",
-    "name": "成瀬",
+    "name": "成瀬　恵介",
+    "name_kana": "ナルセ ケイスケ",
+    "name_hiragana": "なるせ　けいすけ",
     "email": "k-naruse@dxai-sol.co.jp",
-    "phone": "050-1722-6417",
+    "phone": "05017226417",
+    "address": "〒東京都中央区新川1−3−21　Biz Station 茅場町",
+    "postal_code": "104-0033",
+    "department": "ソリューション事業部",
+    "website": "https://dxai-sol.co.jp/",
 }
 
 
@@ -160,6 +171,8 @@ def map_form_fields(form: BeautifulSoup) -> Dict[str, Dict[str, str]]:
             ident = el.get("id", "")
             text = " ".join([label, placeholder, name, ident])
             score = score_field(text, key, el_type)
+            if key == "privacy_consent" and el_type in ("checkbox", "radio"):
+                score += 2
             if score > best[0]:
                 best = (score, el)
         if best[1] is not None and best[0] > 0:
@@ -177,6 +190,8 @@ def build_plan(company_name: str, draft: str, form_url: str, fields: Dict[str, D
             value = company_name
         elif key == "message":
             value = draft
+        elif key == "privacy_consent":
+            value = True
         else:
             value = SENDER_VALUES.get(key)
         if value:
