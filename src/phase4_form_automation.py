@@ -187,11 +187,13 @@ def extract_radio_options(form: BeautifulSoup, name: str) -> List[str]:
 
 
 def choose_inquiry_option(options: List[str]) -> str:
+    blacklist = {"---", "--", "選択してください", "選択", "未選択", "項目を選択"}
+    filtered = [opt for opt in options if opt not in blacklist]
     for pref in INQUIRY_PREFER:
-        for opt in options:
+        for opt in filtered:
             if pref in opt:
                 return opt
-    return options[0] if options else SENDER_VALUES.get("inquiry_type", "その他")
+    return filtered[0] if filtered else SENDER_VALUES.get("inquiry_type", "その他")
 
 
 def score_field(text: str, field_key: str, el_type: str) -> int:
@@ -217,14 +219,16 @@ def map_form_fields(form: BeautifulSoup) -> Dict[str, Dict[str, str]]:
         best = (0, None)
         for el in elements:
             el_type = el.get("type", "text") if el.name == "input" else el.name
+            if key == "privacy_consent" and el_type not in ("checkbox", "radio"):
+                continue
+            if key == "inquiry_type" and el_type not in ("select", "radio"):
+                continue
             label = get_label_text(el)
             placeholder = el.get("placeholder", "")
             name = el.get("name", "")
             ident = el.get("id", "")
             text = " ".join([label, placeholder, name, ident])
             score = score_field(text, key, el_type)
-            if key == "privacy_consent" and el_type in ("checkbox", "radio"):
-                score += 2
             if score > best[0]:
                 best = (score, el)
         if best[1] is not None and best[0] > 0:
