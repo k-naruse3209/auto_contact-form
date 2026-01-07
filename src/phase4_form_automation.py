@@ -44,6 +44,7 @@ FIELD_KEYWORDS = {
     "role": ["役職", "role", "職種"],
     "website": ["URL", "website", "サイト", "web"],
     "privacy_consent": ["プライバシーポリシー", "個人情報", "privacy", "policy", "同意"],
+    "inquiry_type": ["お問合せの種類", "お問い合わせ項目", "問合せ種別", "問合せ項目", "問い合わせ種別", "問い合わせ項目", "種別", "カテゴリ", "category", "inquiry type"],
 }
 
 COMPANY_CONTACT_OVERRIDES = {
@@ -61,6 +62,7 @@ SENDER_VALUES = {
     "postal_code": "104-0033",
     "department": "ソリューション事業部",
     "website": "https://dxai-sol.co.jp/",
+    "inquiry_type": "業務提携",
 }
 
 
@@ -159,6 +161,8 @@ def score_field(text: str, field_key: str, el_type: str) -> int:
         score += 2
     if el_type in ("textarea",) and field_key == "message":
         score += 2
+    if field_key == "inquiry_type" and el_type in ("select", "radio"):
+        score += 2
     return score
 
 
@@ -196,6 +200,8 @@ def build_plan(company_name: str, draft: str, form_url: str, fields: Dict[str, D
             value = draft
         elif key == "privacy_consent":
             value = True
+        elif key == "inquiry_type":
+            value = SENDER_VALUES.get("inquiry_type")
         else:
             value = SENDER_VALUES.get(key)
         if value:
