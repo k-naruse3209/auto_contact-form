@@ -28,3 +28,4 @@
 - Added inquiry type mapping to prefer "業務提携/協業" and fallback to "その他".
 - Avoided mapping inquiry type/consent to non-select checkbox fields.
 - Restricted inquiry_type to fields containing inquiry keywords and safe options only.
+- Skipped inquiry_type when no select/radio options are found.

@@ -245,6 +245,8 @@ def map_form_fields(form: BeautifulSoup) -> Dict[str, Dict[str, str]]:
                         entry["options"] = extract_select_options(el)
                     elif el.name == "input" and el.get("type") == "radio":
                         entry["options"] = extract_radio_options(form, el.get("name", ""))
+                    else:
+                        continue
                 fields[key] = entry
     return fields
 
