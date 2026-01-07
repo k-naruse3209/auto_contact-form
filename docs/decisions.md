@@ -27,3 +27,4 @@
 - Added a Phase4 dashboard generator for field/value review.
 - Added inquiry type mapping to prefer "業務提携/協業" and fallback to "その他".
 - Avoided mapping inquiry type/consent to non-select checkbox fields.
+- Restricted inquiry_type to fields containing inquiry keywords and safe options only.

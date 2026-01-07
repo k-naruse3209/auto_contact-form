@@ -193,7 +193,9 @@ def choose_inquiry_option(options: List[str]) -> str:
         for opt in filtered:
             if pref in opt:
                 return opt
-    return filtered[0] if filtered else SENDER_VALUES.get("inquiry_type", "その他")
+    if "その他" in filtered:
+        return "その他"
+    return ""
 
 
 def score_field(text: str, field_key: str, el_type: str) -> int:
@@ -228,6 +230,8 @@ def map_form_fields(form: BeautifulSoup) -> Dict[str, Dict[str, str]]:
             name = el.get("name", "")
             ident = el.get("id", "")
             text = " ".join([label, placeholder, name, ident])
+            if key == "inquiry_type" and not any(k in text for k in FIELD_KEYWORDS["inquiry_type"]):
+                continue
             score = score_field(text, key, el_type)
             if score > best[0]:
                 best = (score, el)
