@@ -6,6 +6,12 @@
 - Narrowed Phase4 missing-required checks to name/email/message to avoid false positives when no company field exists.
 - Added optional Phase4 company allowlist support for targeted reruns.
 - Added a default Phase1 query that appends "コンサル会社" to the company name.
+- Added Phase1 query variants for "会社情報" and penalized portfolio/case-study pages in official URL scoring.
+- Added Phase1 penalties for known portal domains and entries that lack the company name in title/snippet/display.
+- Boosted Phase1 scoring when the legal name (株式会社/有限会社 + 社名) appears in title/snippet/display and added kensetumap.com to negative domains.
+- Tightened legal-name matching to the exact "株式会社/有限会社 + 社名" string and added job/member portal domains to the negative list.
+- Added consulting keyword boosts and non-consulting keyword penalties in Phase1 scoring to avoid mismatched industries.
+- Added non-official keyword penalties and skipped negative-domain candidates when choosing the official URL.
 
 ## 2026-01-06
 - Added `AGENTS.md` and `CLAUDE.md` to capture Codex/Claude project instructions.

@@ -28,6 +28,9 @@ DEFAULT_NEGATIVE_DOMAINS = {
     "prtimes.jp",
     "onecareer.jp", "biz.ne.jp", "sakura.ne.jp",
     "brandcloud.co.jp", "kenkatsu10.jp",
+    "enepi.jp", "r-compass.jp",
+    "kensetumap.com",
+    "career-tasu.jp", "doyu.jp",
     "xn--",  # punycode heuristic (not block, just lower score)
     "tiktok.com", "facebook.com", "x.com", "twitter.com", "instagram.com",
     "wantedly.com", "en-gage.net", "doda.jp", "rikunabi.com", "mynavi.jp", "indeed.com",
@@ -35,6 +38,22 @@ DEFAULT_NEGATIVE_DOMAINS = {
 }
 
 CONTACTISH_HINTS = ["会社概要", "企業情報", "公式", "コーポレート", "サービス", "事業", "product", "company", "about"]
+CONSULT_HINTS = ["コンサル", "コンサルティング", "経営コンサル", "コンサルタント"]
+NON_CONSULT_HINTS = ["中古車", "車", "買取", "販売", "中古"]
+NON_OFFICIAL_HINTS = [
+    "求人",
+    "就活",
+    "インターン",
+    "転職",
+    "口コミ",
+    "評判",
+    "説明会",
+    "openwork",
+    "jobtalk",
+    "キャリタス",
+    "マイナビ",
+    "リクナビ",
+]
 
 @dataclass
 class Candidate:
@@ -85,11 +104,24 @@ def score_candidate(company_norm: str, cand: Dict[str, Any], rank: int) -> Candi
     evidence.append(f"rank={rank}")
 
     hay = (title + " " + snippet + " " + display).lower()
+    hay_no_space = re.sub(r"\s+", "", hay)
 
     # Company name presence
-    if company_norm and company_norm.lower() in re.sub(r"\s+", "", hay):
+    if company_norm and company_norm.lower() in hay_no_space:
         score += 40
         evidence.append("company_name_match(+40)")
+    else:
+        score -= 15
+        evidence.append("company_name_absent(-15)")
+
+    if company_norm:
+        legal_patterns = [
+            f"株式会社{company_norm.lower()}",
+            f"有限会社{company_norm.lower()}",
+        ]
+        if any(pat in hay_no_space for pat in legal_patterns):
+            score += 30
+            evidence.append("legal_name_match(+30)")
 
     # JP domain preference
     if regdom and is_jp_domain(regdom):
@@ -107,6 +139,26 @@ def score_candidate(company_norm: str, cand: Dict[str, Any], rank: int) -> Candi
             score += 5
             evidence.append(f"hint:{h}(+5)")
             break
+
+    # Consulting hints (prefer consulting firms in this project)
+    if any(h in hay for h in CONSULT_HINTS):
+        score += 10
+        evidence.append("consult_hint(+10)")
+    elif any(h in hay for h in NON_CONSULT_HINTS):
+        score -= 30
+        evidence.append("non_consult_hint(-30)")
+
+    if any(h in hay for h in NON_OFFICIAL_HINTS):
+        score -= 40
+        evidence.append("non_official_hint(-40)")
+
+    # Penalize portfolio/case-study pages (often vendor sites, not official)
+    if any(tag in hay for tag in ["制作実績", "制作事例", "導入事例", "実績紹介", "case study", "portfolio", "works"]):
+        score -= 35
+        evidence.append("portfolio_or_case(-35)")
+    if re.search(r"/(works|portfolio|case|cases|case-study|clients)/", link):
+        score -= 20
+        evidence.append("portfolio_path(-20)")
 
     # Negative domains (soft penalty)
     for bad in DEFAULT_NEGATIVE_DOMAINS:
@@ -173,6 +225,8 @@ def build_queries(company_name: str, hint_industry: Optional[str] = None) -> Lis
         f"{company_name} 会社概要",
         f"{company_name} 事業内容",
         f"{company_name} コンサル会社",
+        f"{company_name} 会社情報",
+        f"{company_name} 会社情報 公式",
     ]
     if company_name == "Kitamura & Company":
         queries.append("株式会社Kitamura&Company 公式サイト")
@@ -196,7 +250,8 @@ def pick_best(company_name: str, items: List[Dict[str, Any]]) -> Tuple[Optional[
     for i, it in enumerate(items, start=1):
         scored.append(score_candidate(company_norm, it, rank=i))
     scored.sort(key=lambda c: c.score, reverse=True)
-    best = scored[0] if scored else None
+    non_negative = [c for c in scored if not any(e.startswith("negative_domain:") for e in c.evidence)]
+    best = non_negative[0] if non_negative else (scored[0] if scored else None)
     return best, scored
 
 def ensure_out_dir(base: Path, company_name: str) -> Path:
