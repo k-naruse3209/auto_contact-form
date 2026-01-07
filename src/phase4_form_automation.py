@@ -152,7 +152,7 @@ def collect_contact_candidates(html: str, base_url: str) -> List[CandidatePage]:
     return sorted(candidates.values(), key=lambda c: c.confidence, reverse=True)
 
 
-def collect_internal_links(html: str, base_url: str, regdom: str) -> List[str]:
+def collect_internal_links(html: str, base_url: str, regdom: str, limit: int = 5) -> List[str]:
     soup = BeautifulSoup(html, "lxml")
     links = {}
     for a in soup.find_all("a"):
@@ -174,7 +174,7 @@ def collect_internal_links(html: str, base_url: str, regdom: str) -> List[str]:
         if score > 0:
             links[url] = max(links.get(url, 0), score)
     ranked = sorted(links.items(), key=lambda x: x[1], reverse=True)
-    return [url for url, _ in ranked[:5]]
+    return [url for url, _ in ranked[:limit]]
 
 
 def add_common_contact_paths(base_url: str) -> List[str]:
@@ -449,13 +449,34 @@ def run_phase4(out_dir: str, max_companies: int = 50) -> None:
                 for cand in ranked:
                     try:
                         page = browser.new_page()
-                        page.goto(cand.url, wait_until="domcontentloaded", timeout=30000)
+                        page.goto(cand.url, wait_until="networkidle", timeout=45000)
+                        page.wait_for_timeout(1500)
                         html = page.content()
-                        page.close()
                     except Exception:
+                        try:
+                            page.close()
+                        except Exception:
+                            pass
                         continue
                     soup = BeautifulSoup(html, "lxml")
                     form = soup.find("form")
+                    if not form:
+                        # iframe fallback
+                        try:
+                            for frame in page.frames:
+                                if frame == page.main_frame:
+                                    continue
+                                html = frame.content()
+                                soup = BeautifulSoup(html, "lxml")
+                                form = soup.find("form")
+                                if form:
+                                    break
+                        except Exception:
+                            form = None
+                    try:
+                        page.close()
+                    except Exception:
+                        pass
                     if not form:
                         continue
                     fields = map_form_fields(form)
@@ -465,6 +486,82 @@ def run_phase4(out_dir: str, max_companies: int = 50) -> None:
                     write_json(company_dir / "07_form_plan.json", plan)
                     plan_written = True
                     break
+
+            if not plan_written and ranked:
+                # deep crawl: two-level internal link exploration
+                deep_candidates = []
+                first_level = []
+                for cand in ranked[:3]:
+                    try:
+                        resp = client.get(cand.url, timeout=20.0)
+                        resp.raise_for_status()
+                    except Exception:
+                        continue
+                    deep_candidates.extend(collect_contact_candidates(resp.text, cand.url))
+                    level_links = collect_internal_links(resp.text, cand.url, regdom, limit=3)
+                    first_level.extend(level_links)
+                    deep_candidates.extend([CandidatePage(url=u, confidence=0.6, evidence=["deep"]) for u in level_links])
+
+                second_level = []
+                for url in first_level[:6]:
+                    try:
+                        resp = client.get(url, timeout=20.0)
+                        resp.raise_for_status()
+                    except Exception:
+                        continue
+                    deep_candidates.extend(collect_contact_candidates(resp.text, url))
+                    level_links = collect_internal_links(resp.text, url, regdom, limit=2)
+                    second_level.extend(level_links)
+                    deep_candidates.extend([CandidatePage(url=u, confidence=0.5, evidence=["deep2"]) for u in level_links])
+
+                if deep_candidates:
+                    uniq2 = {}
+                    for c in deep_candidates:
+                        if registrable_domain(c.url) != regdom:
+                            continue
+                        if c.url not in uniq2 or c.confidence > uniq2[c.url].confidence:
+                            uniq2[c.url] = c
+                    ranked = sorted(uniq2.values(), key=lambda c: c.confidence, reverse=True)[:5]
+                if ranked and browser:
+                    for cand in ranked:
+                        try:
+                            page = browser.new_page()
+                            page.goto(cand.url, wait_until="networkidle", timeout=45000)
+                            page.wait_for_timeout(1500)
+                            html = page.content()
+                        except Exception:
+                            try:
+                                page.close()
+                            except Exception:
+                                pass
+                            continue
+                        soup = BeautifulSoup(html, "lxml")
+                        form = soup.find("form")
+                        if not form:
+                            try:
+                                for frame in page.frames:
+                                    if frame == page.main_frame:
+                                        continue
+                                    html = frame.content()
+                                    soup = BeautifulSoup(html, "lxml")
+                                    form = soup.find("form")
+                                    if form:
+                                        break
+                            except Exception:
+                                form = None
+                        try:
+                            page.close()
+                        except Exception:
+                            pass
+                        if not form:
+                            continue
+                        fields = map_form_fields(form)
+                        if not fields:
+                            continue
+                        plan = build_plan(company_name, draft, cand.url, fields)
+                        write_json(company_dir / "07_form_plan.json", plan)
+                        plan_written = True
+                        break
 
             if not plan_written and ranked:
                 write_json(
