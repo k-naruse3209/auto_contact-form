@@ -30,6 +30,16 @@ CONTACT_KEYWORDS = [
     "support",
 ]
 
+INTERNAL_HINTS = [
+    "会社概要",
+    "企業情報",
+    "事業",
+    "サービス",
+    "プロダクト",
+    "about",
+    "company",
+]
+
 FIELD_KEYWORDS = {
     "company": ["会社", "法人", "法人名", "貴社", "company", "organization"],
     "name": ["氏名", "担当", "お名前", "name"],
@@ -142,10 +152,52 @@ def collect_contact_candidates(html: str, base_url: str) -> List[CandidatePage]:
     return sorted(candidates.values(), key=lambda c: c.confidence, reverse=True)
 
 
+def collect_internal_links(html: str, base_url: str, regdom: str) -> List[str]:
+    soup = BeautifulSoup(html, "lxml")
+    links = {}
+    for a in soup.find_all("a"):
+        href = a.get("href")
+        if not href:
+            continue
+        url = urljoin(base_url, href).split("#", 1)[0]
+        parsed = urlparse(url)
+        if parsed.scheme not in ("http", "https"):
+            continue
+        if registrable_domain(url) != regdom:
+            continue
+        text = normalize_text(a.get_text(" ", strip=True))
+        score = 0
+        hay = f"{text} {url}".lower()
+        for hint in INTERNAL_HINTS:
+            if hint.lower() in hay:
+                score += 2
+        if score > 0:
+            links[url] = max(links.get(url, 0), score)
+    ranked = sorted(links.items(), key=lambda x: x[1], reverse=True)
+    return [url for url, _ in ranked[:5]]
+
+
 def add_common_contact_paths(base_url: str) -> List[str]:
     base = f"{urlparse(base_url).scheme}://{urlparse(base_url).netloc}/"
     paths = ["contact", "contact/", "inquiry", "inquiry/", "otoiawase", "support", "form"]
     return [urljoin(base, p) for p in paths]
+
+
+def find_contact_from_sitemap(client: httpx.Client, base_url: str) -> List[str]:
+    sitemap_url = urljoin(base_url, "/sitemap.xml")
+    try:
+        resp = client.get(sitemap_url, timeout=15.0)
+        if resp.status_code != 200:
+            return []
+        text = resp.text
+    except Exception:
+        return []
+    urls = re.findall(r"<loc>([^<]+)</loc>", text)
+    hits = []
+    for u in urls:
+        if any(k in u.lower() for k in ["contact", "inquiry", "otoiawase", "support"]):
+            hits.append(u)
+    return hits[:5]
 
 
 def get_label_text(el) -> str:
@@ -292,6 +344,16 @@ def run_phase4(out_dir: str, max_companies: int = 50) -> None:
     print(f"[phase4] start: companies={len(company_dirs)}")
 
     with httpx.Client(headers={"User-Agent": USER_AGENT}) as client:
+        playwright = None
+        browser = None
+        try:
+            from playwright.sync_api import sync_playwright
+
+            playwright = sync_playwright().start()
+            browser = playwright.chromium.launch(headless=True, args=["--disable-gpu"])
+        except Exception:
+            playwright = None
+            browser = None
         for company_dir in company_dirs:
             official_path = company_dir / "02_official_url.json"
             draft_path = company_dir / "05_outreach_draft.md"
@@ -314,24 +376,43 @@ def run_phase4(out_dir: str, max_companies: int = 50) -> None:
                 write_json(company_dir / "07_form_plan.json", {"notes": "robots disallow"})
                 continue
 
+            home_html = None
             try:
                 home_resp = client.get(base_url, timeout=20.0)
                 home_resp.raise_for_status()
                 home_html = home_resp.text
             except Exception:
-                write_json(company_dir / "06_contact_page_candidates.json", {"candidates": []})
-                write_json(company_dir / "07_form_plan.json", {"notes": "failed to fetch home"})
-                continue
+                # fall back to official_url if different
+                try:
+                    if official_url != base_url:
+                        alt_resp = client.get(official_url, timeout=20.0)
+                        alt_resp.raise_for_status()
+                        home_html = alt_resp.text
+                except Exception:
+                    home_html = None
 
-            candidates = collect_contact_candidates(home_html, base_url)
+            candidates = []
+            regdom = registrable_domain(base_url)
+            if home_html:
+                candidates.extend(collect_contact_candidates(home_html, base_url))
+                internal_pages = collect_internal_links(home_html, base_url, regdom)
+                for page_url in internal_pages:
+                    try:
+                        resp = client.get(page_url, timeout=20.0)
+                        resp.raise_for_status()
+                    except Exception:
+                        continue
+                    candidates.extend(collect_contact_candidates(resp.text, page_url))
+                    time.sleep(random.uniform(0.2, 0.5))
             for url in add_common_contact_paths(base_url):
                 candidates.append(CandidatePage(url=url, confidence=0.5, evidence=["common_path"]))
+            for url in find_contact_from_sitemap(client, base_url):
+                candidates.append(CandidatePage(url=url, confidence=1.0, evidence=["sitemap"]))
             for url in COMPANY_CONTACT_OVERRIDES.get(company_name, []):
                 candidates.append(CandidatePage(url=url, confidence=2.0, evidence=["override"]))
 
             # de-dup and keep same domain
             uniq = {}
-            regdom = registrable_domain(base_url)
             for c in candidates:
                 if registrable_domain(c.url) != regdom:
                     continue
@@ -364,11 +445,41 @@ def run_phase4(out_dir: str, max_companies: int = 50) -> None:
                 plan_written = True
                 break
 
-            if not plan_written:
+            if not plan_written and ranked and browser:
+                for cand in ranked:
+                    try:
+                        page = browser.new_page()
+                        page.goto(cand.url, wait_until="domcontentloaded", timeout=30000)
+                        html = page.content()
+                        page.close()
+                    except Exception:
+                        continue
+                    soup = BeautifulSoup(html, "lxml")
+                    form = soup.find("form")
+                    if not form:
+                        continue
+                    fields = map_form_fields(form)
+                    if not fields:
+                        continue
+                    plan = build_plan(company_name, draft, cand.url, fields)
+                    write_json(company_dir / "07_form_plan.json", plan)
+                    plan_written = True
+                    break
+
+            if not plan_written and ranked:
+                write_json(
+                    company_dir / "07_form_plan.json",
+                    {"form_url": ranked[0].url, "fields": {}, "notes": "form not detected"},
+                )
+            if not plan_written and not ranked:
                 write_json(company_dir / "07_form_plan.json", {"notes": "no form detected"})
 
             time.sleep(random.uniform(0.3, 0.7))
 
+        if browser:
+            browser.close()
+        if playwright:
+            playwright.stop()
     print("[phase4] DONE")
 
 

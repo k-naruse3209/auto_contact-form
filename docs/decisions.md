@@ -29,3 +29,4 @@
 - Avoided mapping inquiry type/consent to non-select checkbox fields.
 - Restricted inquiry_type to fields containing inquiry keywords and safe options only.
 - Skipped inquiry_type when no select/radio options are found.
+- Added sitemap fallback and form_url fallback when form is not detected.
