@@ -36,7 +36,22 @@ def render_dashboard(out_dir: str, output_path: str) -> None:
         status = "ok" if form_url and fields else "no_form"
 
         field_items = []
-        order = [k for k in fields.keys() if k != "message"] + (["message"] if "message" in fields else [])
+        preferred = [
+            "company",
+            "department",
+            "name",
+            "name_kana",
+            "name_hiragana",
+            "email",
+            "phone",
+            "postal_code",
+            "address",
+            "website",
+            "privacy_consent",
+            "message",
+        ]
+        order = [k for k in preferred if k in fields]
+        order += [k for k in fields.keys() if k not in order]
         for key in order:
             meta = fields.get(key, {})
             val = meta.get("value")
