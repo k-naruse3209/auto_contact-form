@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Dict, List
 
@@ -12,12 +13,18 @@ def read_json(path: Path) -> Dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def safe_id(text: str, fallback: str) -> str:
+    slug = re.sub(r"[^a-zA-Z0-9]+", "-", text).strip("-").lower()
+    return slug or fallback
+
+
 def render_dashboard(out_dir: str, output_path: str) -> None:
     base = Path(out_dir)
     company_dirs = sorted([p for p in base.iterdir() if p.is_dir()])
 
     rows: List[str] = []
-    for company_dir in company_dirs:
+    scripts: List[str] = []
+    for idx, company_dir in enumerate(company_dirs, start=1):
         name = company_dir.name
         plan_path = company_dir / "07_form_plan.json"
         candidates_path = company_dir / "06_contact_page_candidates.json"
@@ -52,9 +59,13 @@ def render_dashboard(out_dir: str, output_path: str) -> None:
         ]
         order = [k for k in preferred if k in fields]
         order += [k for k in fields.keys() if k not in order]
+        plan_values = {}
         for key in order:
             meta = fields.get(key, {})
             val = meta.get("value")
+            sel = meta.get("selector")
+            if sel and val is not None:
+                plan_values[key] = {"selector": sel, "value": val}
             if key == "message" and val:
                 preview = str(val).replace("\n", " ")[:140]
                 field_items.append(
@@ -69,12 +80,27 @@ def render_dashboard(out_dir: str, output_path: str) -> None:
             cand_items.append(f"<div>{cand.get('url')}</div>")
         cand_html = "".join(cand_items) if cand_items else "-"
 
+        plan_id = safe_id(name, f"company-{idx}")
+        scripts.append(
+            f"<script type=\"application/json\" id=\"plan-{plan_id}\">{json.dumps(plan_values, ensure_ascii=False)}</script>"
+        )
         status_badge = f"<span class='pill{'' if status == 'ok' else ' warn'}'>{status}</span>"
+        open_link = (
+            f"<a class='action' href='{form_url}' target='_blank' rel='noopener'>Open</a>"
+            if form_url
+            else "-"
+        )
+        copy_btn = (
+            f"<button class='action ghost' data-plan-id='plan-{plan_id}'>Copy Fill Script</button>"
+            if plan_values
+            else "-"
+        )
         rows.append(
             "<tr>"
             f"<td>{name}</td>"
             f"<td>{status_badge}</td>"
             f"<td class='url'>{form_url or '-'}</td>"
+            f"<td class='actions'>{open_link} {copy_btn}</td>"
             f"<td>{cand_html}</td>"
             f"<td>{field_html}</td>"
             "</tr>"
@@ -171,6 +197,26 @@ def render_dashboard(out_dir: str, output_path: str) -> None:
       color: #1f2937;
       word-break: break-all;
     }}
+    .actions {{
+      white-space: nowrap;
+    }}
+    .action {{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: #111827;
+      text-decoration: none;
+      font-size: 12px;
+      margin-right: 6px;
+      cursor: pointer;
+    }}
+    .action.ghost {{
+      background: #f3f4f6;
+    }}
     details {{
       border: 1px dashed #d1d5db;
       border-radius: 10px;
@@ -203,6 +249,7 @@ def render_dashboard(out_dir: str, output_path: str) -> None:
   <header>
     <h1>Phase4 Form Dashboard</h1>
     <p class="sub">確認用: どの会社に何のフィールドがあり、どの値が入るかを一覧化</p>
+    <p class="sub">Copy Fill Scriptはフォームページを開いてブラウザのコンソールに貼り付けて実行してください。</p>
   </header>
   <div class="wrap">
     <table>
@@ -211,6 +258,7 @@ def render_dashboard(out_dir: str, output_path: str) -> None:
           <th>Company</th>
           <th>Status</th>
           <th>Form URL</th>
+          <th>Actions</th>
           <th>Contact Candidates (top 3)</th>
           <th>Planned Fields (value)</th>
         </tr>
@@ -220,6 +268,57 @@ def render_dashboard(out_dir: str, output_path: str) -> None:
       </tbody>
     </table>
   </div>
+  {"".join(scripts)}
+  <script>
+    function buildFillScript(plan) {{
+      const payload = JSON.stringify(plan || {{}});
+      return `(function() {{
+  const data = ${{payload}};
+  const results = [];
+  const trigger = (el) => {{
+    try {{
+      el.dispatchEvent(new Event('input', {{ bubbles: true }}));
+      el.dispatchEvent(new Event('change', {{ bubbles: true }}));
+    }} catch (e) {{}}
+  }};
+  Object.entries(data).forEach(([key, item]) => {{
+    const el = document.querySelector(item.selector);
+    if (!el) {{
+      results.push({{ key, selector: item.selector, ok: false }});
+      return;
+    }}
+    if (el.type === 'checkbox' || el.type === 'radio') {{
+      el.checked = !!item.value;
+    }} else {{
+      el.value = item.value;
+    }}
+    trigger(el);
+    results.push({{ key, selector: item.selector, ok: true }});
+  }});
+  console.table(results);
+}})();`;
+    }}
+
+    document.addEventListener('click', (event) => {{
+      const btn = event.target.closest('button[data-plan-id]');
+      if (!btn) return;
+      const scriptEl = document.getElementById(btn.dataset.planId);
+      if (!scriptEl) return;
+      let plan = {{}};
+      try {{
+        plan = JSON.parse(scriptEl.textContent || '{{}}');
+      }} catch (e) {{
+        plan = {{}};
+      }}
+      const payload = buildFillScript(plan);
+      navigator.clipboard.writeText(payload).then(() => {{
+        btn.textContent = 'Copied';
+        setTimeout(() => {{
+          btn.textContent = 'Copy Fill Script';
+        }}, 1200);
+      }});
+    }});
+  </script>
 </body>
 </html>
 """

@@ -12,6 +12,7 @@
 - Tightened legal-name matching to the exact "株式会社/有限会社 + 社名" string and added job/member portal domains to the negative list.
 - Added consulting keyword boosts and non-consulting keyword penalties in Phase1 scoring to avoid mismatched industries.
 - Added non-official keyword penalties and skipped negative-domain candidates when choosing the official URL.
+- Added dashboard actions to open forms and copy a fill script for manual execution in the form tab.
 
 ## 2026-01-06
 - Added `AGENTS.md` and `CLAUDE.md` to capture Codex/Claude project instructions.
