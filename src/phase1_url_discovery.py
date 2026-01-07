@@ -115,6 +115,15 @@ def score_candidate(company_norm: str, cand: Dict[str, Any], rank: int) -> Candi
             evidence.append(f"negative_domain:{bad}(-80)")
             break
 
+    # Company-specific domain hints
+    if company_norm and "kitamura&company" in company_norm.lower():
+        if "ykaci.com" in link or "ykaci.com" in display:
+            score += 60
+            evidence.append("preferred_domain:ykaci.com(+60)")
+        if "kitamura.co.jp" in link or "kitamura.co.jp" in display:
+            score -= 40
+            evidence.append("deprioritize_domain:kitamura.co.jp(-40)")
+
     # If no registrable domain, penalize
     if not regdom:
         score -= 30
@@ -164,6 +173,8 @@ def build_queries(company_name: str, hint_industry: Optional[str] = None) -> Lis
         f"{company_name} 会社概要",
         f"{company_name} 事業内容",
     ]
+    if company_name == "Kitamura & Company":
+        queries.append("株式会社Kitamura&Company 公式サイト")
     if hint_industry:
         queries.append(f"{company_name} {hint_industry}")
     # Add a generic consulting hint for ambiguous English names
@@ -233,13 +244,13 @@ def run_phase1(
 
             try:
                 all_items: List[Dict[str, Any]] = []
-            hint = None
-            if "hint_industry" in df.columns:
-                try:
-                    hint = df.loc[df["company_name"] == name, "hint_industry"].dropna().astype(str).iloc[0]
-                except Exception:
-                    hint = None
-            queries = build_queries(name, hint_industry=hint)
+                hint = None
+                if "hint_industry" in df.columns:
+                    try:
+                        hint = df.loc[df["company_name"] == name, "hint_industry"].dropna().astype(str).iloc[0]
+                    except Exception:
+                        hint = None
+                queries = build_queries(name, hint_industry=hint)
                 for q in queries:
                     data = google_cse_search(client, api_key, cx, q, num=num)
                     items = data.get("items", []) or []

@@ -31,3 +31,4 @@
 - Skipped inquiry_type when no select/radio options are found.
 - Added sitemap fallback and form_url fallback when form is not detected.
 - Expanded Phase1 queries with industry hints and consulting keyword for English names.
+- Added a Kitamura & Company alias query for better disambiguation.
