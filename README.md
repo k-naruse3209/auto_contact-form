@@ -72,6 +72,24 @@ auto_contact-form/
 python -m src.main --dry-run
 ```
 
+## ダッシュボードでの入力支援（送信は手動）
+
+`docs/phase4_dashboard.html` をブラウザで開くと、各社フォームの入力計画が確認できます。
+
+### 1) Open+Prep + ブックマークレット（コンソール不要）
+
+1. ダッシュボードの `DXAI Fill` をブックマークバーへドラッグ  
+2. `Open+Prep` を押してフォームを開く  
+3. フォームタブでブックマークの `DXAI Fill` をクリック  
+
+### 2) Open+Prep + Tampermonkey（フォーム側のクリック不要）
+
+1. Chrome拡張で Tampermonkey を追加  
+2. `chrome://extensions/` で「デベロッパーモード」を ON  
+3. ダッシュボードの「Copy Tampermonkey Script」を押す  
+4. Tampermonkeyで新規スクリプトを作成し、内容を貼り付けて保存  
+5. `Open+Prep` を押すと自動で入力される  
+
 ## ドキュメント
 
 - [MVP仕様](docs/spec.md)
